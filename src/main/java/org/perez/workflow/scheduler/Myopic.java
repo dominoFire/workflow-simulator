@@ -13,7 +13,8 @@ import java.util.PriorityQueue;
  */
 public class Myopic
 {
-    public static List<Schedule> schedule(Workflow w, ArrayList<Resource> resourceList) {
+    public static List<Schedule> schedule(Workflow w, List<Resource> resourceList) {
+        Utils.checkScheduleParams(w, resourceList);
         //lista de tareas no calendarizadas
         //TODO: do we need topological sort for tasks?
         ArrayList<Task> readyTasks = new ArrayList<Task>(w.getTasks());
@@ -27,10 +28,10 @@ public class Myopic
             Iterator<Task> it = readyTasks.iterator();
             if(it.hasNext()) {
                 t = it.next();
-                if(checkParents(t, schedTasks, w)) {
+                if(Utils.checkParents(t, schedTasks, w)) {
                     r = R.peek();
                     double d = t.getComplexityFactor() / r.getSpeedFactor();
-                    double st = Math.max(r.getReadyTime(), parentsReadyTime(t, schedules, w)); //TODO: agregar componente de padres
+                    double st = Math.max(r.getReadyTime(), Utils.parentsReadyTime(t, schedules, w)); //TODO: agregar componente de padres
                     Schedule s = new Schedule(t, r, d, st);
                     readyTasks.remove(t);
                     schedTasks.add(t);
@@ -44,30 +45,6 @@ public class Myopic
         }
 
         return schedules;
-    }
-
-    /** Check if parents (dependencies) of task t are on sched list */
-    static boolean checkParents(Task t, ArrayList<Task> sched, Workflow w) {
-        //TODO: do we need check parents?
-        ArrayList<Task> parents = w.getDependencies(t);
-        for(Task parentTask: parents)
-            if(!sched.contains(parentTask))
-                return false;
-        return true;
-    }
-
-    static double parentsReadyTime(Task t, List<Schedule> partialSchedule, Workflow w) {
-        double parentsReadyTime = 0;
-        ArrayList<Task> parents = w.getDependencies(t);
-        //asumimos que tenemos tareas unicas y calendarizaciones unicas
-        for(Task parentTask: parents) {
-            for(Schedule s: partialSchedule) {
-                if(parentTask.equals(s.getTask())) {
-                    parentsReadyTime = Math.max(parentsReadyTime, s.getStart() + s.getDuration());
-                }
-            }
-        }
-        return parentsReadyTime;
     }
 
 }
