@@ -7,6 +7,8 @@ import org.perez.workflow.elements.Workflow;
 
 import java.util.ArrayList;
 import java.util.List;
+import static java.lang.Math.max;
+import static org.perez.workflow.scheduler.Utils.parentsReadyTime;
 
 /**
  * Created by perez on 15/07/14.
@@ -123,13 +125,13 @@ public class XMin
     private static double FAT(Task t, Resource r, Workflow w, List<Schedule> partialSchedule) {
         //le vamos a dar una "semantica" diferente
         //tomamos el tiempo de los padres como el tiempo de archivos listo
-        return Math.max(r.getReadyTime(), Utils.parentsReadyTime(t,partialSchedule,w));
+        return max(r.getReadyTime(), parentsReadyTime(t, partialSchedule, w));
     }
 
     /** Estimated Completion Time: the estimated time by which task t
      will complete execution at resource r. */
     private static double ECT(Task t, Resource r, Workflow w, List<Schedule> partialSchedule) {
-        return EET(t, r) + Math.max(EAT(t,r), FAT(t,r, w, partialSchedule));
+        return EET(t, r) + max(EAT(t,r), FAT(t,r, w, partialSchedule));
     }
 
     /** Minimum Estimated Completion Time: Minimum ECT for task t
@@ -137,7 +139,7 @@ public class XMin
     private static double MCT(Task t, List<Resource> availResources, Workflow w, List<Schedule> partialSchedule) {
         double res = Double.MAX_VALUE;
         for(Resource r: availResources)
-            res = Math.max(res, ECT(t, r, w, partialSchedule));
+            res = max(res, ECT(t, r, w, partialSchedule));
 
         return res;
     }

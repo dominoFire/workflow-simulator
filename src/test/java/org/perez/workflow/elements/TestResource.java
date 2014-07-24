@@ -1,3 +1,5 @@
+package org.perez.workflow.elements;
+
 import org.junit.Test;
 import org.perez.workflow.elements.Resource;
 import static org.junit.Assert.*;

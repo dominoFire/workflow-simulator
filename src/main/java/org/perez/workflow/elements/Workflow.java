@@ -1,7 +1,6 @@
 package org.perez.workflow.elements;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * Created by Fernando on 06/07/2014.
@@ -56,6 +55,17 @@ public class Workflow
         this.dependencies.add(dep);
     }
 
+    public void removeDependency(Task from, Task to) {
+        if(from==null || to==null)
+            throw new IllegalArgumentException("Tasks cannot be null");
+        if(!this.tasks.contains(from) || !this.tasks.contains(to))
+            throw new IllegalArgumentException("Tasks need to be in workflow");
+
+        Pair<Task> dep = new Pair<Task>(from, to);
+        if(this.dependencies.contains(dep))
+            this.dependencies.remove(dep);
+    }
+
     public ArrayList<Task> getTasks() {
         return tasks;
     }
@@ -78,5 +88,55 @@ public class Workflow
                 "tasks=" + tasks +
                 ", dependencies=" + dependencies +
                 '}';
+    }
+
+    public boolean hasCycle() {
+        Map<Task, List<Task>> adj = constructAdjList();
+        Map<Task, Boolean> visited = new HashMap<Task, Boolean>();
+        Map<Task, Boolean> painted = new HashMap<Task, Boolean>();
+        boolean validPath = true;
+        for(Task t:this.tasks)
+            if(painted.get(t)==null) {
+                visited.clear();
+                validPath = visit(adj, t, painted, visited);
+                if(!validPath)
+                    return true;
+            }
+
+        return false;
+    }
+
+    //Devuelve true si no tiene ciclo
+    boolean visit(Map<Task, List<Task>> adj, Task startTask, Map<Task, Boolean> painted, Map<Task, Boolean> visited) {
+        visited.put(startTask, Boolean.TRUE);
+        painted.put(startTask, Boolean.TRUE);
+        List<Task> neigh = adj.get(startTask);
+        for(Task t: neigh) {
+            if(visited.get(t)!=null)
+                return false;
+            if(!visit(adj, t, painted, visited))
+                return false;
+        }
+        visited.remove(startTask);
+        return true;
+    }
+
+    Map<Task, List<Task>> constructAdjList() {
+        Map<Task, List<Task>> adj = new HashMap<Task, List<Task>>();
+
+        for(Pair<Task> p: this.dependencies)
+            if(adj.containsKey(p._1)) {
+                adj.get(p._1).add(p._2);
+            } else {
+                List<Task> list = new ArrayList<Task>();
+                list.add(p._2);
+                adj.put(p._1, list);
+            }
+
+        for(Task t: this.tasks)
+            if(!adj.containsKey(t))
+                adj.put(t, new ArrayList<Task>());
+
+        return adj;
     }
 }

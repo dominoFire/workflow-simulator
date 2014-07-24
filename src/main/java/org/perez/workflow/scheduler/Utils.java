@@ -14,7 +14,7 @@ import java.util.List;
 public class Utils {
     /** Check if parents (dependencies) of task t are on sched list */
     static boolean checkParents(Task t, ArrayList<Task> sched, Workflow w) {
-        //TODO: do we need check parents?
+        //TODO: do we need check parents recursively?
         ArrayList<Task> parents = w.getDependencies(t);
         for(Task parentTask: parents)
             if(!sched.contains(parentTask))
@@ -26,13 +26,11 @@ public class Utils {
         double parentsReadyTime = 0;
         ArrayList<Task> parents = w.getDependencies(t);
         //asumimos que tenemos tareas unicas y calendarizaciones unicas
-        for(Task parentTask: parents) {
-            for(Schedule s: partialSchedule) {
-                if(parentTask.equals(s.getTask())) {
+        for(Task parentTask: parents)
+            for(Schedule s: partialSchedule)
+                if(parentTask.equals(s.getTask()))
                     parentsReadyTime = Math.max(parentsReadyTime, s.getStart() + s.getDuration());
-                }
-            }
-        }
+
         return parentsReadyTime;
     }
 

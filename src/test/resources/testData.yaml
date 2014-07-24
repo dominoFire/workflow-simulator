@@ -1,0 +1,37 @@
+t1: !!org.perez.workflow.elements.Task:
+      - name: "t1"
+      - complexityFactor: 1.0
+ 
+
+tasks:
+  - t1
+  - !!org.perez.workflow.elements.Task:
+      - name: "t2"
+      - complexityFactor: 1.0
+  - !!org.perez.workflow.elements.Task:
+      - name: "t3"
+      - complexityFactor: 1.0
+  - !!org.perez.workflow.elements.Task:
+      - name: "t4"
+      - complexityFactor: 1.0
+  - !!org.perez.workflow.elements.Task:
+      - name: "t5"
+      - complexityFactor: 1.0
+  - !!org.perez.workflow.elements.Task:
+      - name: "t6"
+      - complexityFactor: 1.0
+  - !!org.perez.workflow.elements.Task:
+      - name: "t7"
+      - complexityFactor: 1.0
+  - !!org.perez.workflow.elements.Task:
+      - name: "t8"
+      - complexityFactor: 1.0
+
+resources:
+  - !!org.perez.workflow.elements.Resource:
+      - name: "r1"
+      - speedFactor: 1.0
+  - !!org.perez.workflow.elements.Resource:
+      - name: "r1"
+      - speedFactor: 1.0
+

@@ -1,3 +1,5 @@
+package org.perez.workflow.elements;
+
 import org.junit.Test;
 import org.perez.workflow.elements.Task;
 import org.perez.workflow.elements.Workflow;
