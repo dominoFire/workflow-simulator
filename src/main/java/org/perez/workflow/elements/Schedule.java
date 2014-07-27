@@ -51,13 +51,18 @@ public class Schedule
         this.start = start;
     }
 
+    public double getEnd() {
+        return this.duration + this.start;
+    }
+
     @Override
     public String toString() {
         return "Schedule{" +
                 "task=" + task.getName() +
                 ", resource=" + resource.getName() +
-                ", duration=" + duration +
-                ", start=" + start +
+                ", duration=" + String.format("%.2f", duration) +
+                ", start=" + String.format("%.2f", start) +
+                ", end=" + String.format("%.2f", getEnd()) +
                 '}';
     }
 }

@@ -1,11 +1,18 @@
 package org.perez.workflow.elements;
 
+import org.perez.workflow.scheduler.Utils;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Created by Fernando on 06/07/2014.
  */
 public class Workflow
+    implements Serializable
 {
     /** Tasks that integrates workflow */
     protected ArrayList<Task> tasks;
@@ -138,5 +145,17 @@ public class Workflow
                 adj.put(t, new ArrayList<Task>());
 
         return adj;
+
+    }
+
+    public void write(String objectFile) {
+        Utils.writeObject(objectFile, this);
+    }
+
+    public static Workflow read(String objectFile) throws IOException, ClassNotFoundException {
+        FileInputStream fin = new FileInputStream(objectFile);
+        ObjectInputStream ois = new ObjectInputStream(fin);
+        Workflow w = (Workflow) ois.readObject();
+        return w;
     }
 }

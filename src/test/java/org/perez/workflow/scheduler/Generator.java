@@ -1,8 +1,11 @@
 package org.perez.workflow.scheduler;
 
+import org.perez.workflow.elements.Resource;
 import org.perez.workflow.elements.Task;
 import org.perez.workflow.elements.Workflow;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -11,7 +14,7 @@ import java.util.Random;
 public class Generator
 {
     /** Generate a random DAG with a very naive algorithm */
-    public static Workflow generateRandom(long seed, int n_nodes, int n_edges, double min_cf, double max_cf) {
+    public static Workflow randomWorkflow(long seed, int n_nodes, int n_edges, double min_cf, double max_cf) {
         Random rnd = new Random(seed);
         Task[] tasks = new Task[n_nodes];
         Workflow w = new Workflow();
@@ -36,5 +39,14 @@ public class Generator
         }
 
         return w;
+    }
+
+    public static List<Resource> randomResourceList(long seed, int n_nodes, double min_sf, double max_sf) {
+        Random rnd = new Random(seed);
+        ArrayList<Resource> resList = new ArrayList<Resource>();
+        for(int i=0; i<n_nodes; i++)
+            resList.add(new Resource("r" +(i+1), min_sf + (max_sf - min_sf) * rnd.nextDouble()));
+
+        return resList;
     }
 }

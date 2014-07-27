@@ -1,13 +1,14 @@
 package org.perez.workflow.scheduler;
 
+import it.uniroma1.dis.wsngroup.gexf4j.core.Gexf;
 import org.junit.Test;
-import org.perez.workflow.elements.Resource;
-import org.perez.workflow.elements.Task;
-import org.perez.workflow.elements.Workflow;
+import org.perez.workflow.elements.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by perez on 17/07/14.
@@ -42,17 +43,25 @@ public class TestMaxMin {
 
     @Test
     public void testRandom() {
-
         ArrayList<Resource> resources = new ArrayList<Resource>();
         resources.add(new Resource("r1", 5));
         resources.add(new Resource("r2", 10));
+        resources.add(new Resource("r3", 4));
 
         int n = 10;
         for(int i=0; i<n; i++) {
-            Workflow w = Generator.generateRandom(System.currentTimeMillis(), 10, 12, 1.0, 10.0);
-            Utils.printSchedule(MaxMin.schedule(w, resources));
+            System.out.println("Case " +i);
+            for(Resource r: resources) //init
+                r.setReadyTime(0);
+            Workflow w = Generator.randomWorkflow(System.currentTimeMillis(), 10, 12, 1.0, 10.0);
+            List<Schedule> s = MaxMin.schedule(w, resources);
+            Utils.printSchedule(s);
+            System.out.println(Utils.createRGanttScript(s, "MaxMin " +i));
+            if(!Utils.checkValidSchedule(s))
+                assertTrue("Erroneous schedule", false);
+
+            Gexf gexf = GEXFConverter.toGEXF(w);
+            GEXFConverter.export(gexf, i + ".gexf");
         }
-
-
     }
 }

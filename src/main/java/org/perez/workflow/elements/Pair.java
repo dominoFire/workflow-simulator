@@ -1,10 +1,13 @@
 package org.perez.workflow.elements;
 
+import java.io.Serializable;
+
 /**
  * Created by Fernando on 06/07/2014.
  * Represents a typed pair of elements.
  */
-public class Pair<E>
+public class Pair<E extends Serializable>
+    implements Serializable
 {
     /** First element */
     public E _1;

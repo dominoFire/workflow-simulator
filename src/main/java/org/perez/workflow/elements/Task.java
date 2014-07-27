@@ -1,9 +1,12 @@
 package org.perez.workflow.elements;
 
+import java.io.Serializable;
+
 /**
  * Created by Fernando on 06/07/2014.
  */
 public class Task
+    implements Serializable
 {
     /** Name of task **/
     protected String name;
