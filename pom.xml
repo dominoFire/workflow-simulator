@@ -38,27 +38,12 @@
             <artifactId>gexf4j</artifactId>
             <version>0.4.4-BETA</version>
         </dependency>
-        <dependency>
-            <groupId>org.gephi</groupId>
-            <artifactId>gephi-toolkit</artifactId>
-            <version>0.9-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <repositories>
         <repository>
             <id>umlgraph</id>
             <url>http://mirrors.ibiblio.org/pub/mirrors/maven2</url>
-        </repository>
-        <repository>
-            <id>gephi-snapshots</id>
-            <name>Gephi Snapshots</name>
-            <url>http://nexus.gephi.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
-            <id>gephi-releases</id>
-            <name>Gephi Releases</name>
-            <url>http://nexus.gephi.org/nexus/content/repositories/releases/</url>
         </repository>
     </repositories>
 

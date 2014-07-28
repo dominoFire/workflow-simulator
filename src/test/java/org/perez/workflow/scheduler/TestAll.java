@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 public class TestAll {
     @Test
     public void testAll() {
-        int n = 10;
+        int n = 50;
         Workflow w;
         List<Schedule> s1, s2, s3;
         String g1, g2, g3;
@@ -41,6 +41,7 @@ public class TestAll {
             mkMyopic[i] = Utils.computeMakespan(s1);
             g1 = Utils.createRGanttScript(s1, "Myopic " + i);
             Utils.writeFile("scheduleMyopic" + i + ".R", g1);
+            Utils.writeFile("scheduleMyopic"+i+".csv", Utils.echoSchedule(s1));
             assertTrue(Utils.checkValidSchedule(s1));
 
             Utils.initResources(resourceList);
@@ -48,6 +49,7 @@ public class TestAll {
             mkMinMin[i] = Utils.computeMakespan(s2);
             g2 = Utils.createRGanttScript(s2, "MaxMin " + i);
             Utils.writeFile("scheduleMaxMin" + i + ".R", g2);
+            Utils.writeFile("scheduleMaxMin"+i+".csv", Utils.echoSchedule(s2));
             assertTrue(Utils.checkValidSchedule(s2));
 
             Utils.initResources(resourceList);
@@ -55,6 +57,7 @@ public class TestAll {
             mkMaxMin[i] = Utils.computeMakespan(s3);
             g3 = Utils.createRGanttScript(s3, "MinMin " +i);
             Utils.writeFile("scheduleMinMin" + i + ".R", g3);
+            Utils.writeFile("scheduleMinMin"+i+".csv", Utils.echoSchedule(s3));
             assertTrue(Utils.checkValidSchedule(s3));
         }
 

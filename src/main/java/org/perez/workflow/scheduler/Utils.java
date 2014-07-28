@@ -53,6 +53,17 @@ public class Utils {
         return (makespan_end - makespan_start);
     }
 
+    public static String echoSchedule(List<Schedule> sched) {
+        StringBuffer sb = new StringBuffer();
+
+        sb.append("task,resource,start,end,duration\n");
+        for(Schedule s: sched) {
+            sb.append(String.format("%s,%s,%f,%f,%f\n",
+                    s.getTask().getName(), s.getResource().getName(), s.getStart(), s.getEnd(), s.getDuration()));
+        }
+        return sb.toString();
+    }
+
     public static void printSchedule(List<Schedule> sched) {
         for(Schedule s: sched) {
             System.out.println(s);
@@ -81,11 +92,17 @@ public class Utils {
             List<Pair<Double>> l_t = r_t.get(r);
             Pair<Double>[] arr = l_t.toArray(new Pair[l_t.size()]);
             Arrays.sort(arr, new Comparator<Pair<Double>>() {
+                int compare(double a, double b) {
+                    if( a > b) return 1;
+                    else if (Math.abs(a - b) < 0.0000001)
+                        return 0;
+                    return -1;
+                }
                 @Override
                 public int compare(Pair<Double> o1, Pair<Double> o2) {
-                    int r1 = Double.compare(o1._1, o2._1);
+                    int r1 = this.compare(o1._1, o2._1);
                     if(r1==0)
-                        return Double.compare(o1._2, o2._2);
+                        return this.compare(o1._2, o2._2);
                     return r1;
                 }
             });

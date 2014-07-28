@@ -100,7 +100,7 @@ public class XMin
             //remote T from availTasks
             availTasks.remove(t);
             //update EAT(R_t)
-            //r.addReadyTime( Math.max(duration, Utils.parentsReadyTime(t, partialSched, w)) );
+            r.setReadyTime( startTime );
             r.addReadyTime( duration );
         }
 

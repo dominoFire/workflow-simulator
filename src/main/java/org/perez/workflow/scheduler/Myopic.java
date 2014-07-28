@@ -40,6 +40,7 @@ public class Myopic
                 Schedule s = new Schedule(t, r, d, st);
                 allTasks.remove(t);
                 schedTasks.add(t);
+                r.setReadyTime(st);
                 r.addReadyTime(d);
                 //TODO: Update resource priority queue
                 R = new PriorityQueue<Resource>(resourceList.size(), EarliestStartTimeComparator.getComp());
