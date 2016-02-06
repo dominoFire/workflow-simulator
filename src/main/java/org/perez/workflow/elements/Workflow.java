@@ -15,13 +15,13 @@ public class Workflow
     implements Serializable
 {
     /** Tasks that integrates workflow */
-    protected ArrayList<Task> tasks;
+    protected Set<Task> tasks;
     /** Dependencies between tasks in the format (from, to) */
-    protected HashSet<Pair<Task>> dependencies;
+    protected Set<Pair<Task>> dependencies;
 
     public Workflow()
     {
-        this.tasks = new ArrayList<Task>();
+        this.tasks = new HashSet<Task>();
         this.dependencies = new HashSet<Pair<Task>>();
     }
 
@@ -45,6 +45,7 @@ public class Workflow
             throw new IllegalArgumentException("Task has already been added");
 
         this.tasks.add(t);
+        t.setWorkflow(this);
     }
 
     public void addDependency(Task from, Task to) {
@@ -60,6 +61,8 @@ public class Workflow
             throw new IllegalArgumentException("This dependency has already been added");
 
         this.dependencies.add(dep);
+        to.addDependency(from);
+        from.addSuccessor(to);
     }
 
     public void removeDependency(Task from, Task to) {
@@ -69,19 +72,23 @@ public class Workflow
             throw new IllegalArgumentException("Tasks need to be in workflow");
 
         Pair<Task> dep = new Pair<Task>(from, to);
-        if(this.dependencies.contains(dep))
+        if(this.dependencies.contains(dep)) {
             this.dependencies.remove(dep);
+
+            from.removeSuccessor(to);
+            to.removeDependency(from);
+        }
     }
 
-    public ArrayList<Task> getTasks() {
+    public Set<Task> getTasks() {
         return tasks;
     }
 
-    public void setTasks(ArrayList<Task> tasks) {
+    public void setTasks(Set<Task> tasks) {
         this.tasks = tasks;
     }
 
-    public HashSet<Pair<Task>> getDependencies() {
+    public Set<Pair<Task>> getDependencies() {
         return dependencies;
     }
 

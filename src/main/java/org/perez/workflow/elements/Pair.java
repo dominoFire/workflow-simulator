@@ -54,4 +54,9 @@ public class Pair<E extends Serializable>
         result = 31 * result + (_2 != null ? _2.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return String.format("(%s,%s)", this._1.toString(), this._2.toString());
+    }
 }

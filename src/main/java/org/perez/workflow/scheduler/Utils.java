@@ -9,9 +9,9 @@ import java.util.*;
  * Created by perez on 17/07/14.
  */
 public class Utils {
-    /** Check if parents (dependencies) of task t are on sched list */
+    /** Check if successors (dependencies) of task t are on sched list */
     static boolean checkParents(Task t, ArrayList<Task> sched, Workflow w) {
-        //TODO: do we need check parents recursively?
+        //TODO: do we need check successors recursively?
         ArrayList<Task> parents = w.getDependencies(t);
         for(Task parentTask: parents)
             if(!sched.contains(parentTask))

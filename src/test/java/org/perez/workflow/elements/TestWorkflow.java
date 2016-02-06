@@ -45,6 +45,13 @@ public class TestWorkflow {
 
     @Test
     public void testProperties() {
+        Workflow w = generateSimpleWorkflow();
+
+        System.out.println(w);
+    }
+
+    public static Workflow generateSimpleWorkflow()
+    {
         Task t1 = new Task("task1", 1.0);
         Task t2 = new Task("task2", 1.0);
         Task t3 = new Task("task3", 1.0);
@@ -60,6 +67,6 @@ public class TestWorkflow {
         w.addDependency(t3,t4);
         w.addDependency(t2,t4);
 
-        System.out.println(w);
+        return w;
     }
 }
