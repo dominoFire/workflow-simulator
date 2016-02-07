@@ -5,10 +5,12 @@ import org.perez.workflow.elements.Schedule;
 import org.perez.workflow.elements.Task;
 import org.perez.workflow.elements.Workflow;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Created by microkid on 30/01/16.
@@ -16,26 +18,40 @@ import java.util.Map;
 public class Blind
 {
 
-    public static List<Schedule> schedule(Workflow w, List<Resource> resourceList) {
+    public static List<Schedule> schedule(Workflow w, List<Resource> resourceList)
+    {
         return null;
     }
 
 
+    protected static Map<Integer, Set<Task> > toSegmentList(Map<Task, Integer> segments)
+    {
+        Map<Integer, Set<Task> > segmentList = new HashMap<>();
+        Set<Task> tasks;
 
-    public static int estimateResources(Workflow w) {
-        HashMap<Task, Integer> segments = new HashMap<Task, Integer>();
-        HashSet<Task> visited = new HashSet<Task>();
-        int max_segment = 0;
-
-        // Build the
-        for(Task t: w.getTasks()) {
-            findSegment(t, segments, visited);
+        for(Entry<Task, Integer> kv: segments.entrySet()) {
+            segment = kv.getValue();
+            if(segmentList.containsKey(segment)) {
+                tasks = segmentList.get(segment);
+            } else {
+                tasks = new HashSet<>();
+                segmentList.put(segment, tasks);
+            }
+            tasks.add(kv.getKey());
         }
+
+        return segmentList;
+    }
+
+
+    protected static int estimateResources(Map<Task, Integer> segments)
+    {
+        int max_segment = 0;
 
         HashMap<Integer, Integer> segmentsHeight = new HashMap<Integer, Integer>();
         int val, segment;
 
-        for(Map.Entry<Task, Integer> kv: segments.entrySet()) {
+        for(Entry<Task, Integer> kv: segments.entrySet()) {
             segment = kv.getValue();
             if(segmentsHeight.containsKey(segment))
                 val = segmentsHeight.get(segment);
@@ -49,7 +65,21 @@ public class Blind
         return max_segment;
     }
 
-    private static int findSegment(Task t, HashMap<Task, Integer> segments, HashSet<Task> visited)
+    protected static Map<Task, Integer> getSegments(Workflow w)
+    {
+        HashMap<Task, Integer> segments = new HashMap<Task, Integer>();
+        HashSet<Task> visited = new HashSet<Task>();
+
+        // Build the
+        for(Task t: w.getTasks()) {
+            findSegment(t, segments, visited);
+        }
+
+        return segments;
+    }
+
+
+    protected static int findSegment(Task t, Map<Task, Integer> segments, Set<Task> visited)
     {
         visited.add(t);
         int max_seg = 0;
