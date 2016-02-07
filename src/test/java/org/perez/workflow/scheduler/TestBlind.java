@@ -13,6 +13,8 @@ public class TestBlind {
     public void testEstimateResources() {
         Workflow w = TestWorkflow.generateSimpleWorkflow();
 
+        Map<Task, Integer> segments = Blind.getTaskSegments(w);
+
         int maxResources = Blind.estimateResources(w);
 
         org.junit.Assert.assertEquals(2, maxResources);
