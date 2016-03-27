@@ -13,9 +13,70 @@ import java.util.Map.Entry;
 public class Blind
 {
 
-    public static List<Schedule> schedule(Workflow w, List<Resource> resourceList)
+    public static List<Schedule> schedule(Workflow w, List<ResourceConfig> resourceConfigs)
     {
-        return null;
+        // Transform Workflow into segments
+        Map<Task, Integer> segments = Blind.getSegments(w);
+        Map<Integer, Set<Task>> segmentList = Blind.toSegmentList(segments);
+
+        // Generate optimum scheduling for each segment
+        Map<Integer, Collection<Blind.BinPackingEntry>> mappingsList = new HashMap<>();
+        Map<ResourceConfig, List<Integer>> dict_res = new HashMap<>();
+
+        for(Map.Entry<Integer, Set<Task>> e: segmentList.entrySet()) {
+            Collection<Blind.BinPackingEntry> mappings = Blind.binPacking(e.getValue(), resourceConfigs);
+            mappingsList.put(e.getKey(), mappings);
+            System.out.println(mappings);
+            // Find out names
+            for(Blind.BinPackingEntry pe: mappings) {
+                List<Integer> coll = dict_res.containsKey(pe.resourceConfig)? dict_res.get(pe.resourceConfig): new ArrayList<Integer>();
+                coll.add(e.getKey());
+                dict_res.put(pe.resourceConfig, coll);
+            }
+        }
+
+        // Count how many resources are needed
+        Map<ResourceConfig, List<String>> res_names = new HashMap<>();
+        for(ResourceConfig config: dict_res.keySet()) {
+            Map<Integer, Integer> counter = new HashMap<>();
+            for(Integer s: dict_res.get(config))
+                counter.merge(s, 1, Integer::sum);
+            int res_n = 0;
+            for(Integer c: counter.values())
+                res_n = Math.max(res_n, c);
+            // Generate the resource names
+            List<String> names = new ArrayList<>();
+            for(int i=0; i<res_n; i++)
+                names.add(Utils.generateResoureName(0));
+            res_names.put(config, names);
+        }
+
+        // Build Schedule mappings
+        Map<String, Resource> resourceMap = new HashMap<>();
+        List<Schedule> scheds = new ArrayList<>();
+        double st = 0., st_ant = 0.;
+        for(Integer s: mappingsList.keySet()) {
+            Collection<Blind.BinPackingEntry> mappings = mappingsList.get(s);
+            Map<ResourceConfig, Integer> res_idx = new HashMap<>();
+            res_names.forEach((rc, li) -> res_idx.put(rc, 0));
+            for(Blind.BinPackingEntry bpe: mappings) {
+                ResourceConfig rc = bpe.resourceConfig;
+                String res_name = res_names.get(rc).get(res_idx.get(rc));
+                res_idx.merge(rc, 1, Integer::sum);
+                st = 0.;
+                for(int j=0; j<bpe.task.size(); j++) {
+                    Task t = bpe.task.get(j);
+                    double d = t.getComplexityFactor() / rc.getSpeedFactor();
+                    st = Math.max(d, st);
+                    Resource r = Blind.getOrCreate(resourceMap, res_name, j+1, rc);
+                    Schedule sched = new Schedule(t, r, d, st_ant);
+                    scheds.add(sched);
+                }
+            }
+            st_ant = st_ant + st;
+        }
+
+        return scheds;
     }
 
 
@@ -93,10 +154,10 @@ public class Blind
         return segments.get(t);
     }
 
-    protected static void binPacking(List<Task> tasks, List<ResourceConfig> resoureConfigs) {
+    protected static Collection<BinPackingEntry> binPacking(Collection<Task> tasks, Collection<ResourceConfig> resoureConfigs) {
         BinPackingAssigner bpa = new BinPackingAssigner(tasks, resoureConfigs);
 
-        bpa.getMappings();
+        return bpa.getMappings();
     }
 
     static class BinPackingAssigner
@@ -106,35 +167,41 @@ public class Blind
         double[][] memCosts;
         int[][] visited;
         int[] used;
-        List<BinPackingEntry> resourceMappings;
+        Collection<BinPackingEntry> resourceMappings;
 
-        public BinPackingAssigner(List<Task> tasks, List<ResourceConfig> resourceConfigs)
+        public BinPackingAssigner(Collection<Task> tasks, Collection<ResourceConfig> resourceConfigs)
         {
             if(tasks==null || tasks.isEmpty())
                 throw new IllegalArgumentException("tasks cannot be empty or null");
             if(resourceConfigs==null || resourceConfigs.isEmpty())
                 throw  new IllegalArgumentException("resourceConfigs cannot be null or empty");
 
+
             this.tasks = new Task[tasks.size()];
+            Iterator<Task> it = tasks.iterator();
             for(int i=0; i<tasks.size(); i++) {
-                if(tasks.get(i)==null)
+                Task t = it.next();
+                if(t==null)
                     throw new IllegalArgumentException(String.format("Task list element %d cannot be null", i));
-                this.tasks[i] = tasks.get(i);
+                this.tasks[i] = t;
             }
 
             this.resourceConfigs = new ResourceConfig[resourceConfigs.size()];
+            Iterator<ResourceConfig> itrc = resourceConfigs.iterator();
             for(int i=0; i<resourceConfigs.size(); i++) {
-                if(resourceConfigs.get(i)==null)
+                ResourceConfig rc = itrc.next();
+                if(rc==null)
                     throw new IllegalArgumentException(String.format("ResourceConfig list element %d cannot be null", i));
-                this.resourceConfigs[i] = resourceConfigs.get(i);
+                this.resourceConfigs[i] = rc;
             }
 
             this.memCosts = new double[tasks.size()][resourceConfigs.size()];
             this.visited = new int[tasks.size()][resourceConfigs.size()];
             this.used = new int[resourceConfigs.size()];
+            this.resourceMappings = new ArrayList<>();
         }
 
-        public List<BinPackingEntry> getMappings() {
+        public Collection<BinPackingEntry> getMappings() {
             this.take(0, 0);
             this.checkTake(0, 0);
             return this.resourceMappings;
@@ -160,14 +227,24 @@ public class Blind
                 double taked_cost = 0.;
                 for(int tt_i=t_i; tt_i<t_lim; tt_i++) {
                     Task tt = this.tasks[tt_i];
+                    // TODO: change this line to minimize either cost or time
+
+                    // For minimizing cost
                     taked_cost = Math.max(
                             taked_cost,
                             tt.getComplexityFactor() / rc.getSpeedFactor() * rc.getCost() * 1000);
+
+                    // For minimizing time
+                    //taked_cost = Math.max(
+                    //        taked_cost,
+                    //        tt.getComplexityFactor() / rc.getSpeedFactor());
                 }
                 this.used[y] += 1;
                 double taken = take(t_lim, 0) + taked_cost;
                 this.used[y] -= 1;
                 double taken_not = take(t_i, y + 1);
+                // For single variable optimization, we want to always chose the
+                // option with minimum cost (either time or money)
                 this.memCosts[t_i][y] = Math.min(taken, taken_not);
                 this.visited[t_i][y] = taken < taken_not? 1: -1; //1 => Taken
             }
@@ -181,17 +258,18 @@ public class Blind
          * @param rc_i
          */
         protected void checkTake(int t_i, int rc_i) {
-            if(this.visited[t_i][rc_i]==1) {
-                ResourceConfig rc = this.resourceConfigs[rc_i];
-                int t_lim = Math.min(this.tasks.length, t_i + rc.getCores());
-                checkTake(t_lim, 0);
-                List<Task> tasks = new ArrayList<>();
-                for(int t=t_i; t<t_lim; t++)
-                    tasks.add(this.tasks[t]);
-                this.resourceMappings.add(new BinPackingEntry(tasks, rc));
-            } else if(this.visited[t_i][rc_i]== -1) {
-                checkTake(t_i, rc_i + 1);
-            }
+            if(t_i < this.tasks.length && rc_i < this.resourceConfigs.length)
+                if(this.visited[t_i][rc_i]==1) {
+                    ResourceConfig rc = this.resourceConfigs[rc_i];
+                    int t_lim = Math.min(this.tasks.length, t_i + rc.getCores());
+                    checkTake(t_lim, 0);
+                    List<Task> tasks = new ArrayList<>();
+                    for(int t=t_i; t<t_lim; t++)
+                        tasks.add(this.tasks[t]);
+                    this.resourceMappings.add(new BinPackingEntry(tasks, rc));
+                } else if(this.visited[t_i][rc_i]== -1) {
+                    checkTake(t_i, rc_i + 1);
+                }
         }
 
         /**
@@ -227,5 +305,17 @@ public class Blind
             this.task = task;
             this.resourceConfig = resourceConfig;
         }
+    }
+
+    public static Resource getOrCreate(Map<String, Resource> res_map, String res_name, int core, ResourceConfig rc) {
+        String full_name = String.format("%s@Core%d", res_name, core);
+        Resource res = null;
+        if(res_map.containsKey(full_name))
+            res = res_map.get(full_name);
+        else {
+            res = new Resource(full_name, rc.getSpeedFactor());
+            res_map.put(full_name, res);
+        }
+        return res;
     }
 }

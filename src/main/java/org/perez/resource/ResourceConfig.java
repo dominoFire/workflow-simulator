@@ -37,6 +37,20 @@ public class ResourceConfig
 	 */
 	protected double cost;
 
+
+	public ResourceConfig() {
+
+	}
+
+	public ResourceConfig(String name, int cores, double ramMemory, String provider, double speedFactor, double cost) {
+		this.name = name;
+		this.cores = cores;
+		this.ramMemory = ramMemory;
+		this.provider = provider;
+		this.speedFactor = speedFactor;
+		this.cost = cost;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -83,5 +97,19 @@ public class ResourceConfig
 
 	public void setCost(double cost) {
 		this.cost = cost;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if(o == null || !(o instanceof ResourceConfig))
+			return false;
+		ResourceConfig rc  = (ResourceConfig)o;
+
+		return  this.name.equals(rc.name);
+	}
+
+	@Override
+	public int hashCode() {
+		return this.name.hashCode();
 	}
 }

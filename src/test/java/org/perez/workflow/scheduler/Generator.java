@@ -43,7 +43,7 @@ public class Generator
 
     public static List<Resource> randomResourceList(long seed, int n_nodes, double min_sf, double max_sf) {
         Random rnd = new Random(seed);
-        ArrayList<Resource> resList = new ArrayList<Resource>();
+        ArrayList<Resource> resList = new ArrayList<>();
         for(int i=0; i<n_nodes; i++)
             resList.add(new Resource("r" +(i+1), min_sf + (max_sf - min_sf) * rnd.nextDouble()));
 

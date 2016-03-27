@@ -245,4 +245,14 @@ public class Utils {
         for(Resource r: list)
             r.setReadyTime(0);
     }
+
+    /**
+     * Generate a sweeper-prefixed string, followed by a UUID segment
+     * @param id_num
+     * @return a str with a sweeper prefixed name
+     */
+    public static String generateResoureName(int id_num) {
+        UUID uuid = UUID.randomUUID();
+        return String.format("sweeper%di%s", id_num, uuid.toString().substring(0, 8));
+    }
 }
