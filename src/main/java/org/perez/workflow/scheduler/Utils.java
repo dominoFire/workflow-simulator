@@ -111,8 +111,12 @@ public class Utils {
                 return false;
 
             for(int i=1; i<arr.length; i++)
-                if(arr[i-i]._2 > arr[i]._1) // se traslapan
+                if(arr[i-i]._2 > arr[i]._1) {
+                    // se traslapan
+                    System.err.printf("This schedule has overlapping mappings: %.5f - %.5f\n", arr[i-1]._2, arr[i]._1);
                     return false;
+                }
+
         }
 
         return true;
@@ -185,7 +189,7 @@ public class Utils {
         sb.append(String.format("gantt.chart(schedList, vgridpos=%d:%d, vgridlab=%d:%d, taskcolors=rainbow(%d), main=\"%s\")\n",
                 i_ini, i_fin, i_ini, i_fin, arr.length, plotTitle));
 
-        sb.append(String.format("text(x=schedList$starts+0.05,y=%d-%s+1,labels=%s)\n", coordRes.size(), sbCoord.toString(), sbLabels.toString()));
+        sb.append(String.format("text(x=schedList$starts,y=%d-%s+1,labels=%s,pos=4,offset=0.2)\n", coordRes.size(), sbCoord.toString(), sbLabels.toString()));
         sb.append("dev.off()\n");
 
         return sb.toString();
@@ -251,8 +255,18 @@ public class Utils {
      * @param id_num
      * @return a str with a sweeper prefixed name
      */
-    public static String generateResoureName(int id_num) {
+    public static String generateResourceName(int id_num) {
         UUID uuid = UUID.randomUUID();
         return String.format("sweeper%di%s", id_num, uuid.toString().substring(0, 8));
+    }
+
+    public static List<Resource> getResourcesFromSchedule(List<Schedule> schedules) {
+        Set<Resource> res = new HashSet<>();
+        schedules.forEach((s) -> res.add(s.getResource()));
+
+        List<Resource> resList = new ArrayList<>();
+        res.forEach((r) -> resList.add(r));
+
+        return resList;
     }
 }

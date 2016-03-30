@@ -11,6 +11,7 @@ import java.util.List;
  */
 public interface WorkflowSchedulingAlgorithm
 {
+    List<Schedule> generateSchedule(Workflow w, List<Resource> resourceList);
 
-    List<Schedule> schedule(Workflow w, List<Resource> resourceList);
+    String getName();
 }

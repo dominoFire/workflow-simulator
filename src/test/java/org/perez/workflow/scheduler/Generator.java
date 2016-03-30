@@ -28,13 +28,15 @@ public class Generator
             from = rnd.nextInt(n_nodes);
             to = rnd.nextInt(n_nodes);
             try {
-                w.addDependency(tasks[from], tasks[to]);
-                if(w.hasCycle())
-                    w.removeDependency(tasks[from], tasks[to]);
-                else
-                    i++;
+                if(from!=to) {
+                    w.addDependency(tasks[from], tasks[to]);
+                    if(w.hasCycle())
+                        w.removeDependency(tasks[from], tasks[to]);
+                    else
+                        i++;
+                }
             } catch(Exception e) {
-
+                //System.err.println("Error while generating workflow: " + e.getMessage());
             }
         }
 

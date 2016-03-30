@@ -12,7 +12,26 @@ import java.util.PriorityQueue;
  * Created by Fernando on 06/07/2014.
  */
 public class Myopic
+    implements WorkflowSchedulingAlgorithm
 {
+    private static Myopic instance;
+
+    public static WorkflowSchedulingAlgorithm getInstance() {
+        if(instance==null)
+            instance = new Myopic();
+        return instance;
+    }
+
+    @Override
+    public List<Schedule> generateSchedule(Workflow w, List<Resource> resourceList) {
+        return schedule(w, resourceList);
+    }
+
+    @Override
+    public String getName() {
+        return "Myopic";
+    }
+
     public static List<Schedule> schedule(Workflow w, List<Resource> resourceList) {
         Utils.checkScheduleParams(w, resourceList);
         //lista de tareas no calendarizadas

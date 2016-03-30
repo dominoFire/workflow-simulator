@@ -59,5 +59,4 @@ public class TestMyopic {
         resources.add(new Resource("r1", 1));
         Utils.printSchedule(Myopic.schedule(w, resources));
     }
-
 }

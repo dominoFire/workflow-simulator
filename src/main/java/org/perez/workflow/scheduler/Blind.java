@@ -4,7 +4,6 @@ import org.perez.resource.ResourceConfig;
 import org.perez.workflow.elements.*;
 
 import java.util.*;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
 /**
@@ -26,7 +25,7 @@ public class Blind
         for(Map.Entry<Integer, Set<Task>> e: segmentList.entrySet()) {
             Collection<Blind.BinPackingEntry> mappings = Blind.binPacking(e.getValue(), resourceConfigs);
             mappingsList.put(e.getKey(), mappings);
-            System.out.println(mappings);
+            //System.out.println(mappings);
             // Find out names
             for(Blind.BinPackingEntry pe: mappings) {
                 List<Integer> coll = dict_res.containsKey(pe.resourceConfig)? dict_res.get(pe.resourceConfig): new ArrayList<Integer>();
@@ -47,15 +46,15 @@ public class Blind
             // Generate the resource names
             List<String> names = new ArrayList<>();
             for(int i=0; i<res_n; i++)
-                names.add(Utils.generateResoureName(0));
+                names.add(Utils.generateResourceName(0));
             res_names.put(config, names);
         }
 
         // Build Schedule mappings
         Map<String, Resource> resourceMap = new HashMap<>();
         List<Schedule> scheds = new ArrayList<>();
-        double st = 0., st_ant = 0.;
-        for(Integer s: mappingsList.keySet()) {
+        double d_max = 0., st_ant = 0.;
+        for(int s=1; s<=mappingsList.size(); s++) {
             Collection<Blind.BinPackingEntry> mappings = mappingsList.get(s);
             Map<ResourceConfig, Integer> res_idx = new HashMap<>();
             res_names.forEach((rc, li) -> res_idx.put(rc, 0));
@@ -63,17 +62,17 @@ public class Blind
                 ResourceConfig rc = bpe.resourceConfig;
                 String res_name = res_names.get(rc).get(res_idx.get(rc));
                 res_idx.merge(rc, 1, Integer::sum);
-                st = 0.;
+                //d_max = 0.;
                 for(int j=0; j<bpe.task.size(); j++) {
                     Task t = bpe.task.get(j);
                     double d = t.getComplexityFactor() / rc.getSpeedFactor();
-                    st = Math.max(d, st);
+                    d_max = Math.max(d, d_max);
                     Resource r = Blind.getOrCreate(resourceMap, res_name, j+1, rc);
                     Schedule sched = new Schedule(t, r, d, st_ant);
                     scheds.add(sched);
                 }
             }
-            st_ant = st_ant + st;
+            st_ant = st_ant + d_max;
         }
 
         return scheds;
@@ -230,14 +229,14 @@ public class Blind
                     // TODO: change this line to minimize either cost or time
 
                     // For minimizing cost
-                    taked_cost = Math.max(
-                            taked_cost,
-                            tt.getComplexityFactor() / rc.getSpeedFactor() * rc.getCost() * 1000);
-
-                    // For minimizing time
                     //taked_cost = Math.max(
                     //        taked_cost,
-                    //        tt.getComplexityFactor() / rc.getSpeedFactor());
+                    //        tt.getComplexityFactor() / rc.getSpeedFactor() * rc.getCost() * 1000);
+
+                    // For minimizing time
+                    taked_cost = Math.max(
+                            taked_cost,
+                            tt.getComplexityFactor() / rc.getSpeedFactor());
                 }
                 this.used[y] += 1;
                 double taken = take(t_lim, 0) + taked_cost;

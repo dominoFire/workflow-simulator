@@ -78,7 +78,7 @@ public class TestBlind {
             // Generate the resource names
             List<String> names = new ArrayList<>();
             for(int i=0; i<res_n; i++)
-                names.add(Utils.generateResoureName(0));
+                names.add(Utils.generateResourceName(0));
             res_names.put(config, names);
         }
 
@@ -121,7 +121,7 @@ public class TestBlind {
             System.out.println(s);
     }
 
-    private List<ResourceConfig> sampleConfigs() {
+    public static List<ResourceConfig> sampleConfigs() {
         List<ResourceConfig> resourceConfigs = new ArrayList<>();
 
         resourceConfigs.add(new ResourceConfig("Small", 1, 768., "TestCloud", 100, 2.3));
