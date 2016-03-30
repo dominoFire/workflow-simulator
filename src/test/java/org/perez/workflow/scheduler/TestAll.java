@@ -121,7 +121,7 @@ public class TestAll {
                 Utils.writeFile("schedule" + algo.getName() + i + ".csv", Utils.echoSchedule(scheduleSimple));
                 assertTrue(Utils.checkValidSchedule(scheduleSimple));
 
-                sb.append(String.format("%.4f", makespan));
+                sb.append(String.format(",%.5f", makespan));
                 System.out.println(algo.getName() + " makespan: " + makespan);
             }
             sb.append("\n");
