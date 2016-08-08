@@ -1,5 +1,8 @@
 package org.perez.workflow.scheduler;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonWriter;
 import org.perez.workflow.elements.*;
 
 import java.io.*;
@@ -224,6 +227,32 @@ public class Utils {
         return w;
     }
 
+    public static Gson getGSON()
+    {
+        return new GsonBuilder()
+                .registerTypeAdapter(Workflow.class, new WorkflowDeserializer())
+                .create();
+    }
+
+    public static void writeJson(String objectFile, Object o)
+    {
+        Gson gson = getGSON();
+        String json = gson.toJson(o);
+        Utils.writeFile(objectFile, json);
+    }
+
+    public static <T> T readJson(String objectFile, Class<T> type)
+    {
+        Gson gson = getGSON();
+        T result = null;
+        try {
+            result = gson.fromJson(new FileReader(objectFile), type);
+        } catch (FileNotFoundException e) {
+            System.err.println("Cannot read JSON: " +e.getMessage());
+        }
+        return result;
+    }
+
     public static void writeFile(String filename, String content) {
         PrintWriter pw = null;
         try {
@@ -235,6 +264,7 @@ public class Utils {
             System.exit(1);
         }
     }
+
 
     public static void writeResourceList(String filename, List<Resource> resourceList) {
         StringBuffer sb = new StringBuffer();
@@ -268,5 +298,40 @@ public class Utils {
         res.forEach((r) -> resList.add(r));
 
         return resList;
+    }
+
+    public static boolean isConnectedWorkflow(Workflow w)
+    {
+        return new ConnectedWorkflowVistor(w).isConnected();
+    }
+
+    static class ConnectedWorkflowVistor
+    {
+        HashSet<Task> visited;
+        Workflow workflow;
+
+        public ConnectedWorkflowVistor(Workflow w) {
+            this.visited = new HashSet<>();
+            this.workflow = w;
+        }
+
+        public boolean isConnected() {
+            Task any = this.workflow.getTasks().iterator().next();
+            this.visit(any);
+
+            for(Task t: this.workflow.getTasks())
+                if(!visited.contains(t))
+                    return false;
+
+            return true;
+         }
+
+        public void visit(Task t) {
+            this.visited.add(t);
+            for(Task h: t.getSuccessors()){
+                if(!visited.contains(h))
+                    this.visit(h);
+            }
+        }
     }
 }

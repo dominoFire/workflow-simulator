@@ -17,7 +17,7 @@ public class TestBlind {
 
         Map<Task, Integer> segments = Blind.getSegments(w);
 
-        int maxResources = Blind.estimateResources(segments);
+        int maxResources = Blind.       estimateResources(segments);
 
         org.junit.Assert.assertEquals(2, maxResources);
     }

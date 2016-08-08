@@ -19,9 +19,9 @@ public class Task
     /**
      *
      */
-    protected Set<Task> successors;
+    protected transient Set<Task> successors;
 
-    protected Set<Task> dependencies;
+    protected transient Set<Task> dependencies;
 
 
     protected Workflow workflow;

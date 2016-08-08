@@ -45,7 +45,7 @@ public class Workflow
             throw new IllegalArgumentException("Task has already been added");
 
         this.tasks.add(t);
-        t.setWorkflow(this);
+        //t.setWorkflow(this);
     }
 
     public void addDependency(Task from, Task to) {
@@ -112,7 +112,7 @@ public class Workflow
         for(Task t:this.tasks)
             if(painted.get(t)==null) {
                 visited.clear();
-                validPath = visit(adj, t, painted, visited);
+                validPath = visitCycle(adj, t, painted, visited);
                 if(!validPath)
                     return true;
             }
@@ -120,15 +120,44 @@ public class Workflow
         return false;
     }
 
+    /**
+     * Does all tasks can be completed ?
+     * @return
+     */
+    public boolean isFullyConnected()
+    {
+        Map<Task, List<Task>> adj = this.constructUndirectedAdjList();
+        Set<Task> visited = new HashSet<>();
+        Set<Task> painted = new HashSet<>();
+        Task first = tasks.iterator().next();
+
+        this.visitConnected(adj, first, painted, visited);
+        for(Task t: this.tasks)
+            if(!visited.contains(t))
+                return false;
+
+        return true;
+    }
+
+    void visitConnected(Map<Task, List<Task>> adj, Task startTask, Set<Task> painted, Set<Task> visited)
+    {
+        painted.add(startTask);
+        visited.add(startTask);
+
+        for(Task t_ch: adj.get(startTask))
+            if(!painted.contains(t_ch))
+                visitConnected(adj, t_ch, painted, visited);
+    }
+
     //Devuelve true si no tiene ciclo
-    boolean visit(Map<Task, List<Task>> adj, Task startTask, Map<Task, Boolean> painted, Map<Task, Boolean> visited) {
+    boolean visitCycle(Map<Task, List<Task>> adj, Task startTask, Map<Task, Boolean> painted, Map<Task, Boolean> visited) {
         visited.put(startTask, Boolean.TRUE);
         painted.put(startTask, Boolean.TRUE);
         List<Task> neigh = adj.get(startTask);
         for(Task t: neigh) {
             if(visited.get(t)!=null)
                 return false;
-            if(!visit(adj, t, painted, visited))
+            if(!visitCycle(adj, t, painted, visited))
                 return false;
         }
         visited.remove(startTask);
@@ -153,6 +182,20 @@ public class Workflow
 
         return adj;
 
+    }
+
+    Map<Task, List<Task>> constructUndirectedAdjList() {
+        Map<Task, List<Task>> adj = new HashMap<Task, List<Task>>();
+
+        for(Task t: this.tasks)
+            adj.put(t, new ArrayList<Task>());
+
+        for(Pair<Task> p: this.dependencies) {
+            adj.get(p._1).add(p._2);
+            adj.get(p._2).add(p._1);
+        }
+
+        return adj;
     }
 
     public void write(String objectFile) {

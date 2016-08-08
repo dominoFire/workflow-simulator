@@ -33,6 +33,7 @@ public class TestAll {
         for(int i=0; i<n; i++) {
             System.out.println("Case " +(i+1));
             w = Generator.randomWorkflow(System.currentTimeMillis(), 10, 12, 1.0, 10.0);
+            //w = Generator.connectedRandomWorkflow(System.currentTimeMillis(), 10, 1., 10.);
             Utils.writeObject("workflow" +i +".obj", w);
             GEXFConverter.export(GEXFConverter.toGEXF(w), "workflow" + i + ".gexf");
             nnodes[i] = w.getTasks().size();
@@ -94,12 +95,14 @@ public class TestAll {
         StringBuffer sb = new StringBuffer();
         double makespan;
 
-        sb.append("wf_num, mk_blind, mk_maxmin, mk_minmin, mk_myopic\n");
+        sb.append("wf_num, mk_blind, mk_maxmin, mk_minmin, mk_myopic, wk_connex\n");
 
         for(int i=0; i<n; i++) {
             System.out.println("Testing workflow " + i);
-            Workflow w = Generator.randomWorkflow(System.currentTimeMillis(), 10, 12, 1.0, 10.0);
-            Utils.writeObject("workflow" +i +".obj", w);
+            //Workflow w = Generator.randomWorkflow(System.currentTimeMillis(), 10, 12, 1.0, 10.0, Boolean.TRUE);
+            Workflow w = Generator.connectedRandomWorkflow(System.currentTimeMillis(), 10, 1., 10.);
+            //Utils.writeObject("workflow" +i +".obj", w);
+            Utils.writeJson(String.format("workflow%d.obj", i), w);
             GEXFConverter.export(GEXFConverter.toGEXF(w), "workflow" + i + ".gexf");
 
             List<Schedule> blindSchedule = Blind.schedule(w, resourceConfigs);
@@ -124,6 +127,7 @@ public class TestAll {
                 sb.append(String.format(",%.5f", makespan));
                 System.out.println(algo.getName() + " makespan: " + makespan);
             }
+            sb.append("," + Utils.isConnectedWorkflow(w));
             sb.append("\n");
         }
         Utils.writeFile("results.csv", sb.toString());
