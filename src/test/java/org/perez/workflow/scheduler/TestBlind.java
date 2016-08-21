@@ -125,9 +125,9 @@ public class TestBlind {
         List<ResourceConfig> resourceConfigs = new ArrayList<>();
 
         resourceConfigs.add(new ResourceConfig("Small", 1, 768., "TestCloud", 100, 2.3));
-        resourceConfigs.add(new ResourceConfig("Medium", 2, 4096., "TestCloud", 200, 4.3));
-        resourceConfigs.add(new ResourceConfig("Large", 4, 8192., "TestCloud", 500, 5.3));
-        resourceConfigs.add(new ResourceConfig("ExtraLarge", 8, 2 * 8192., "TestCloud", 900, 9.3));
+        resourceConfigs.add(new ResourceConfig("Medium", 2, 4096., "TestCloud", 200, 4.6));
+        resourceConfigs.add(new ResourceConfig("Large", 4, 8192., "TestCloud", 400, 9.2));
+        resourceConfigs.add(new ResourceConfig("ExtraLarge", 8, 2 * 8192., "TestCloud", 800, 18.4));
 
         return  resourceConfigs;
     }

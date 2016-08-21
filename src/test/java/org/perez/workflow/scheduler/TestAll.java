@@ -93,9 +93,10 @@ public class TestAll {
         List<ResourceConfig> resourceConfigs = TestBlind.sampleConfigs();
         WorkflowSchedulingAlgorithm[] wfs_algorithms = getAlgorithms();
         StringBuffer sb = new StringBuffer();
-        double makespan;
+        double makespan, makespan_blind;
+        boolean blind_winner = false;
 
-        sb.append("wf_num, mk_blind, mk_maxmin, mk_minmin, mk_myopic, wk_connex\n");
+        sb.append("wf_num, mk_blind, mk_maxmin, mk_minmin, mk_myopic, wk_connex, blind_winner\n");
 
         for(int i=0; i<n; i++) {
             System.out.println("Testing workflow " + i);
@@ -106,20 +107,21 @@ public class TestAll {
             GEXFConverter.export(GEXFConverter.toGEXF(w), "workflow" + i + ".gexf");
 
             List<Schedule> blindSchedule = Blind.schedule(w, resourceConfigs);
-            makespan = Utils.computeMakespan(blindSchedule);
+            makespan_blind = Utils.computeMakespan(blindSchedule);
             Utils.writeFile("schedule" + "Blind" + i + ".R", Utils.createRGanttScript(blindSchedule, "Blind" + i));
             Utils.writeFile("schedule" + "Blind" + i + ".csv", Utils.echoSchedule(blindSchedule));
             assertTrue(Utils.checkValidSchedule(blindSchedule));
 
             List<Resource> resourceList = Utils.getResourcesFromSchedule(blindSchedule);
-            sb.append(String.format("%d,%.4f", i, makespan));
-            System.out.println("Blind makespan: " + makespan);
+            sb.append(String.format("%d,%.4f", i, makespan_blind));
+            System.out.println("Blind makespan: " + makespan_blind);
 
             for(WorkflowSchedulingAlgorithm algo: wfs_algorithms) {
                 Utils.initResources(resourceList);
 
                 List<Schedule> scheduleSimple = algo.generateSchedule(w, resourceList);
                 makespan = Utils.computeMakespan(scheduleSimple);
+                blind_winner = blind_winner | makespan_blind < makespan;
                 Utils.writeFile("schedule" + algo.getName() + i + ".R", Utils.createRGanttScript(scheduleSimple, algo.getName() + i));
                 Utils.writeFile("schedule" + algo.getName() + i + ".csv", Utils.echoSchedule(scheduleSimple));
                 assertTrue(Utils.checkValidSchedule(scheduleSimple));
@@ -127,7 +129,8 @@ public class TestAll {
                 sb.append(String.format(",%.5f", makespan));
                 System.out.println(algo.getName() + " makespan: " + makespan);
             }
-            sb.append("," + Utils.isConnectedWorkflow(w));
+            sb.append(",").append(Utils.isConnectedWorkflow(w));
+            sb.append(",").append(blind_winner);
             sb.append("\n");
         }
         Utils.writeFile("results.csv", sb.toString());

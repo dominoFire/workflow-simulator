@@ -7,10 +7,12 @@ import java.util.*;
 import java.util.Map.Entry;
 
 /**
- * Created by microkid on 30/01/16.
+ * Algoritmo ciego
+ *
  */
 public class Blind
 {
+
 
     public static List<Schedule> schedule(Workflow w, List<ResourceConfig> resourceConfigs)
     {
@@ -20,7 +22,7 @@ public class Blind
 
         // Generate optimum scheduling for each segment
         Map<Integer, Collection<Blind.BinPackingEntry>> mappingsList = new HashMap<>();
-        Map<ResourceConfig, List<Integer>> dict_res = new HashMap<>();
+        Map<ResourceConfig, List<Integer>> allConfigs = new HashMap<>();
 
         for(Map.Entry<Integer, Set<Task>> e: segmentList.entrySet()) {
             Collection<Blind.BinPackingEntry> mappings = Blind.binPacking(e.getValue(), resourceConfigs);
@@ -28,17 +30,18 @@ public class Blind
             //System.out.println(mappings);
             // Find out names
             for(Blind.BinPackingEntry pe: mappings) {
-                List<Integer> coll = dict_res.containsKey(pe.resourceConfig)? dict_res.get(pe.resourceConfig): new ArrayList<Integer>();
-                coll.add(e.getKey());
-                dict_res.put(pe.resourceConfig, coll);
+                List<Integer> segList = allConfigs.containsKey(pe.resourceConfig)? allConfigs.get(pe.resourceConfig): new ArrayList<Integer>();
+                segList.add(e.getKey());
+                allConfigs.put(pe.resourceConfig, segList);
             }
         }
 
         // Count how many resources are needed
         Map<ResourceConfig, List<String>> res_names = new HashMap<>();
-        for(ResourceConfig config: dict_res.keySet()) {
+        for(ResourceConfig config: allConfigs.keySet()) {
+            // For each config, find out how many resources are needed
             Map<Integer, Integer> counter = new HashMap<>();
-            for(Integer s: dict_res.get(config))
+            for(Integer s: allConfigs.get(config))
                 counter.merge(s, 1, Integer::sum);
             int res_n = 0;
             for(Integer c: counter.values())
@@ -53,21 +56,23 @@ public class Blind
         // Build Schedule mappings
         Map<String, Resource> resourceMap = new HashMap<>();
         List<Schedule> scheds = new ArrayList<>();
-        double d_max = 0., st_ant = 0.;
+        double d_max = 0., st_ant = 0., d = 0;
         for(int s=1; s<=mappingsList.size(); s++) {
             Collection<Blind.BinPackingEntry> mappings = mappingsList.get(s);
+
             Map<ResourceConfig, Integer> res_idx = new HashMap<>();
             res_names.forEach((rc, li) -> res_idx.put(rc, 0));
+
+            d_max = 0.;
             for(Blind.BinPackingEntry bpe: mappings) {
                 ResourceConfig rc = bpe.resourceConfig;
                 String res_name = res_names.get(rc).get(res_idx.get(rc));
-                res_idx.merge(rc, 1, Integer::sum);
-                //d_max = 0.;
+                res_idx.merge(rc, 0, Integer::sum); // res_idx[rc]++;
                 for(int j=0; j<bpe.task.size(); j++) {
                     Task t = bpe.task.get(j);
-                    double d = t.getComplexityFactor() / rc.getSpeedFactor();
-                    d_max = Math.max(d, d_max);
                     Resource r = Blind.getOrCreate(resourceMap, res_name, j+1, rc);
+                    d = t.getComplexityFactor() / r.getSpeedFactor();
+                    d_max = Math.max(d, d_max);
                     Schedule sched = new Schedule(t, r, d, st_ant);
                     scheds.add(sched);
                 }
@@ -174,7 +179,6 @@ public class Blind
                 throw new IllegalArgumentException("tasks cannot be empty or null");
             if(resourceConfigs==null || resourceConfigs.isEmpty())
                 throw  new IllegalArgumentException("resourceConfigs cannot be null or empty");
-
 
             this.tasks = new Task[tasks.size()];
             Iterator<Task> it = tasks.iterator();
@@ -304,6 +308,15 @@ public class Blind
             this.task = task;
             this.resourceConfig = resourceConfig;
         }
+
+        public double getRuntime()
+        {
+            double d = 0.;
+            for(Task t: this.task)
+                d = Math.max(d, t.getComplexityFactor() / this.resourceConfig.getSpeedFactor());
+            return d;
+        }
+
     }
 
     public static Resource getOrCreate(Map<String, Resource> res_map, String res_name, int core, ResourceConfig rc) {
