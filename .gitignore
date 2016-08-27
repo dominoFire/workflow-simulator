@@ -49,3 +49,8 @@ schedule*.R
 
 # Graphics
 *.pdf
+*.ps
+*.dot
+
+# data
+*.seed

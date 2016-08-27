@@ -100,10 +100,15 @@ public class TestAll {
 
         for(int i=0; i<n; i++) {
             System.out.println("Testing workflow " + i);
-            //Workflow w = Generator.randomWorkflow(System.currentTimeMillis(), 10, 12, 1.0, 10.0, Boolean.TRUE);
-            Workflow w = Generator.connectedRandomWorkflow(System.currentTimeMillis(), 10, 1., 10.);
+            //Configuracion que funciona
+            //Workflow w = Generator.randomWorkflow(System.currentTimeMillis(), 10, 18, 50., 100.0);
+            long millis = System.currentTimeMillis();
+            Workflow w = Generator.connectedRandomWorkflow(millis, 10, 50., 100.);
+            System.out.printf("Semilla: %d\n", millis);
             //Utils.writeObject("workflow" +i +".obj", w);
             Utils.writeJson(String.format("workflow%d.obj", i), w);
+            Utils.writeFile(String.format("workflow%d.dot", i), w.toGraphviz("workflow" + i));
+            Utils.writeFile(String.format("workflow%d.seed", i), Long.toString(millis));
             GEXFConverter.export(GEXFConverter.toGEXF(w), "workflow" + i + ".gexf");
 
             List<Schedule> blindSchedule = Blind.schedule(w, resourceConfigs);
@@ -116,6 +121,7 @@ public class TestAll {
             sb.append(String.format("%d,%.4f", i, makespan_blind));
             System.out.println("Blind makespan: " + makespan_blind);
 
+            blind_winner = false;
             for(WorkflowSchedulingAlgorithm algo: wfs_algorithms) {
                 Utils.initResources(resourceList);
 
@@ -129,7 +135,7 @@ public class TestAll {
                 sb.append(String.format(",%.5f", makespan));
                 System.out.println(algo.getName() + " makespan: " + makespan);
             }
-            sb.append(",").append(Utils.isConnectedWorkflow(w));
+            sb.append(",").append(w.isFullyConnected());
             sb.append(",").append(blind_winner);
             sb.append("\n");
         }

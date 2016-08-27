@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by Fernando on 06/07/2014.
@@ -207,5 +208,93 @@ public class Workflow
         ObjectInputStream ois = new ObjectInputStream(fin);
         Workflow w = (Workflow) ois.readObject();
         return w;
+    }
+
+    public String toGraphviz(String title) {
+        List<List<Task>> paths = new PathVisitor(this).getPaths();
+        StringBuffer sb = new StringBuffer();
+
+        sb.append("digraph")
+                .append(" ")
+                .append(title)
+                .append(" ")
+                .append("{\n");
+
+        /*
+        for(List<Task> path: paths) {
+            for(int i=0; i<path.size(); i++) {
+                if(i>0)
+                    sb.append(" -> ");
+                sb.append(path.get(i).getName());
+            }
+            sb.append(";\n");
+        }*/
+
+        for(Pair<Task> p: this.getDependencies()) {
+            sb
+                .append(p.get_1().getName())
+                .append(" -> ")
+                .append(p.get_2().getName())
+                .append(";\n");
+        }
+
+        sb.append("}\n");
+        return sb.toString();
+    }
+
+    class PathVisitor
+    {
+        List<List<Task>> paths;
+        Workflow w;
+        Stack<Task> currentPath;
+        Set<Task> visited;
+        Set<Task> colored;
+
+        public PathVisitor(Workflow w)
+        {
+            this.w = w;
+            this.currentPath = new Stack<>();
+            this.visited = new HashSet<>();
+            this.colored = new HashSet<>();
+        }
+
+        void visit(Task t, Map<Task, List<Task>> adjDirected)
+        {
+            currentPath.push(t);
+            this.colored.add(t);
+
+            if(adjDirected.get(t).size()==0) {
+                //print path
+                int s = currentPath.size();
+                List<Task> p = Arrays.asList(currentPath.toArray(new Task[s]));
+                this.paths.add(p);
+            } else {
+                for(Task tt: adjDirected.get(t)) {
+                    if(!colored.contains(tt))
+                        this.visit(tt, adjDirected);
+                }
+            }
+
+            this.visited.add(t);
+            currentPath.pop();
+        }
+
+        public List<List<Task>> getPaths()
+        {
+            this.currentPath.clear();
+            this.visited.clear();
+            this.colored.clear();
+            this.paths = new ArrayList<>();
+
+            Map<Task, List<Task>> adjDirected = this.w.constructAdjList();
+            for(Task t: w.getTasks())
+                if(!visited.contains(t)) {
+                    this.colored.clear();
+                    this.visit(t, adjDirected);
+                }
+
+
+            return this.paths;
+        }
     }
 }

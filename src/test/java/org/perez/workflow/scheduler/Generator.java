@@ -39,6 +39,7 @@ public class Generator
             }
         }
 
+        /*
         while(Utils.isConnectedWorkflow(w)!=connected) {
             from = rnd.nextInt(n_nodes);
             to = rnd.nextInt(n_nodes);
@@ -52,6 +53,7 @@ public class Generator
                 //System.err.println("Error while generating workflow: " + e.getMessage());
             }
         }
+        */
 
         return w;
     }
