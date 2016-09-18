@@ -54,3 +54,4 @@ schedule*.R
 
 # data
 *.seed
+.Rproj.user

@@ -93,17 +93,17 @@ public class TestAll {
         List<ResourceConfig> resourceConfigs = TestBlind.sampleConfigs();
         WorkflowSchedulingAlgorithm[] wfs_algorithms = getAlgorithms();
         StringBuffer sb = new StringBuffer();
-        double makespan, makespan_blind;
-        boolean blind_winner = false;
+        double makespan, makespan_blind, cost, cost_blind;
+        boolean blind_mk_winner, blind_cost_winner;
 
-        sb.append("wf_num, mk_blind, mk_maxmin, mk_minmin, mk_myopic, wk_connex, blind_winner\n");
+        sb.append("wf_num, mk_blind, cost_blind, mk_maxmin, cost_maxmin, mk_minmin, cost_minmin, mk_myopic, cost_myopic, wk_connex, blind_mk_winner, blind_cost_winner\n");
 
         for(int i=0; i<n; i++) {
             System.out.println("Testing workflow " + i);
             //Configuracion que funciona
             //Workflow w = Generator.randomWorkflow(System.currentTimeMillis(), 10, 18, 50., 100.0);
             long millis = System.currentTimeMillis();
-            Workflow w = Generator.connectedRandomWorkflow(millis, 10, 50., 100.);
+            Workflow w = Generator.connectedRandomWorkflow(millis, 10, 10., 1000.);
             System.out.printf("Semilla: %d\n", millis);
             //Utils.writeObject("workflow" +i +".obj", w);
             Utils.writeJson(String.format("workflow%d.obj", i), w);
@@ -113,30 +113,38 @@ public class TestAll {
 
             List<Schedule> blindSchedule = Blind.schedule(w, resourceConfigs);
             makespan_blind = Utils.computeMakespan(blindSchedule);
+            cost_blind = Utils.computeCostGlobal(blindSchedule);
+
             Utils.writeFile("schedule" + "Blind" + i + ".R", Utils.createRGanttScript(blindSchedule, "Blind" + i));
             Utils.writeFile("schedule" + "Blind" + i + ".csv", Utils.echoSchedule(blindSchedule));
             assertTrue(Utils.checkValidSchedule(blindSchedule));
 
             List<Resource> resourceList = Utils.getResourcesFromSchedule(blindSchedule);
-            sb.append(String.format("%d,%.4f", i, makespan_blind));
-            System.out.println("Blind makespan: " + makespan_blind);
 
-            blind_winner = false;
+            sb.append(String.format("%d,%.6f,%.6f", i, makespan_blind, cost_blind));
+            System.out.printf("Blind makespan: %.6f, cost: %.6f\n", makespan_blind, cost_blind);
+
+            blind_mk_winner = false;
+            blind_cost_winner = false;
             for(WorkflowSchedulingAlgorithm algo: wfs_algorithms) {
                 Utils.initResources(resourceList);
 
                 List<Schedule> scheduleSimple = algo.generateSchedule(w, resourceList);
                 makespan = Utils.computeMakespan(scheduleSimple);
-                blind_winner = blind_winner | makespan_blind < makespan;
+                cost = Utils.computeCostGlobal(scheduleSimple);
+
+                blind_mk_winner = blind_mk_winner | makespan_blind <= makespan;
+                blind_cost_winner = blind_cost_winner | cost_blind <= cost;
+
                 Utils.writeFile("schedule" + algo.getName() + i + ".R", Utils.createRGanttScript(scheduleSimple, algo.getName() + i));
                 Utils.writeFile("schedule" + algo.getName() + i + ".csv", Utils.echoSchedule(scheduleSimple));
                 assertTrue(Utils.checkValidSchedule(scheduleSimple));
-
-                sb.append(String.format(",%.5f", makespan));
-                System.out.println(algo.getName() + " makespan: " + makespan);
+                sb.append(String.format(",%.6f,%.6f", makespan, cost));
+                System.out.printf("%s makespan: %.6f, cost: %.6f\n", algo.getName(), makespan, cost);
             }
             sb.append(",").append(w.isFullyConnected());
-            sb.append(",").append(blind_winner);
+            sb.append(",").append(blind_mk_winner);
+            sb.append(",").append(blind_cost_winner);
             sb.append("\n");
         }
         Utils.writeFile("results.csv", sb.toString());

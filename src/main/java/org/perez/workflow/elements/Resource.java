@@ -14,6 +14,8 @@ public class Resource
     protected double speedFactor;
     /** Time when the resources is ready. Initally 0 */
     protected double readyTime;
+    /** Cost per hour for executing this workflow */
+    protected double costHour;
 
     public Resource(String name, double speedFactor) {
         this.setName(name);
@@ -54,6 +56,16 @@ public class Resource
         if(readyTime < 0)
             throw new IllegalArgumentException("Resource ready time is less than zero");
         this.readyTime = readyTime;
+    }
+
+    public double getCostHour() {
+        return costHour;
+    }
+
+    public void setCostHour(double costHour) {
+        if(costHour < 0.)
+            throw new IllegalArgumentException("Cost per hour cannot be null");
+        this.costHour = costHour;
     }
 
     public void addReadyTime(double readyTime) {

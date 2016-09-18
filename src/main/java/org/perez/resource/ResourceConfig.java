@@ -1,5 +1,7 @@
 package org.perez.resource;
 
+import org.perez.workflow.elements.Resource;
+
 import java.io.Serializable;
 import java.io.StringReader;
 
@@ -111,5 +113,12 @@ public class ResourceConfig
 	@Override
 	public int hashCode() {
 		return this.name.hashCode();
+	}
+
+	public Resource toResource()
+	{
+		Resource r = new Resource("temp_" + this.name, this.speedFactor);
+		r.setCostHour(this.cost);
+		return r;
 	}
 }

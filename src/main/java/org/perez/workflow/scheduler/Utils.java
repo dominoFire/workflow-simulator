@@ -47,7 +47,8 @@ public class Utils {
         return true;
     }
 
-    public static double computeMakespan(List<Schedule> schedule) {
+    public static double computeMakespan(List<Schedule> schedule)
+    {
         double makespan_end = Double.MIN_VALUE, makespan_start = Double.MAX_VALUE;
         for(Schedule s: schedule) {
             makespan_start = Math.min(makespan_start, s.getStart());
@@ -55,6 +56,38 @@ public class Utils {
         }
         return (makespan_end - makespan_start);
     }
+
+    public static double computeCost(List<Schedule> schedule)
+    {
+        double cost = 0.;
+
+        for(Schedule s: schedule) {
+            cost += s.getDuration() * s.getResource().getCostHour();
+        }
+
+        return cost;
+    }
+
+    public static double computeCostGlobal(List<Schedule> schedule)
+    {
+        double cost = 0.;
+
+        List<Resource> resources = Utils.getResourcesFromSchedule(schedule);
+        Map<Resource, Pair<Double>> execTimes = new HashMap<>();
+
+        for (Schedule s: schedule) {
+            Pair<Double> timeLapse = execTimes.getOrDefault(s.getResource(), new Pair<>(0., 0.));
+            double max_v = Math.max(s.getEnd(), timeLapse.get_2());
+            timeLapse.set_2(max_v);
+            execTimes.put(s.getResource(), timeLapse);
+        }
+        for(Resource r: execTimes.keySet()) {
+            cost += r.getCostHour() * execTimes.get(r)._2;
+        }
+
+        return cost;
+    }
+
 
     public static String echoSchedule(List<Schedule> sched) {
         StringBuffer sb = new StringBuffer();

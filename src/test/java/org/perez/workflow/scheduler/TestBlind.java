@@ -32,10 +32,10 @@ public class TestBlind {
         Map<Integer, Set<Task>> segmentList = Blind.toSegmentList(segments);
 
         List<ResourceConfig> resourceConfigs = this.sampleConfigs();
-        Map<Integer, Collection<Blind.BinPackingEntry>> mappings = new HashMap<>();
+        Map<Integer, Collection<BinPackingEntry>> mappings = new HashMap<>();
 
         for(Map.Entry<Integer, Set<Task>> e: segmentList.entrySet()) {
-            Collection<Blind.BinPackingEntry> m = Blind.binPacking(e.getValue(), resourceConfigs);
+            Collection<BinPackingEntry> m = Blind.binPacking(e.getValue(), resourceConfigs);
             mappings.put(e.getKey(), m);
             System.out.println(m);
         }
@@ -50,16 +50,16 @@ public class TestBlind {
         Map<Integer, Set<Task>> segmentList = Blind.toSegmentList(segments);
 
         List<ResourceConfig> resourceConfigs = this.sampleConfigs();
-        Map<Integer, Collection<Blind.BinPackingEntry>> mappingsList = new HashMap<>();
+        Map<Integer, Collection<BinPackingEntry>> mappingsList = new HashMap<>();
         Map<ResourceConfig, List<Integer>> dict_res = new HashMap<>();
 
 
         for(Map.Entry<Integer, Set<Task>> e: segmentList.entrySet()) {
-            Collection<Blind.BinPackingEntry> mappings = Blind.binPacking(e.getValue(), resourceConfigs);
+            Collection<BinPackingEntry> mappings = Blind.binPacking(e.getValue(), resourceConfigs);
             mappingsList.put(e.getKey(), mappings);
             System.out.println(mappings);
             // Find out names
-            for(Blind.BinPackingEntry pe: mappings) {
+            for(BinPackingEntry pe: mappings) {
                 List<Integer> coll = dict_res.containsKey(pe.resourceConfig)? dict_res.get(pe.resourceConfig): new ArrayList<Integer>();
                 coll.add(e.getKey());
                 dict_res.put(pe.resourceConfig, coll);
@@ -87,10 +87,10 @@ public class TestBlind {
         List<Schedule> scheds = new ArrayList<>();
         double st = 0., st_ant = 0.;
         for(Integer s: mappingsList.keySet()) {
-            Collection<Blind.BinPackingEntry> mappings = mappingsList.get(s);
+            Collection<BinPackingEntry> mappings = mappingsList.get(s);
             Map<ResourceConfig, Integer> res_idx = new HashMap<>();
             res_names.forEach((rc, li) -> res_idx.put(rc, 0));
-            for(Blind.BinPackingEntry bpe: mappings) {
+            for(BinPackingEntry bpe: mappings) {
                 ResourceConfig rc = bpe.resourceConfig;
                 String res_name = res_names.get(rc).get(res_idx.get(rc));
                 res_idx.merge(rc, 1, Integer::sum);
