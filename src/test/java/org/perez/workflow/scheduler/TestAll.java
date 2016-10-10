@@ -8,6 +8,7 @@ import org.perez.workflow.elements.Schedule;
 import org.perez.workflow.elements.Workflow;
 
 import java.util.List;
+import java.util.Random;
 import java.util.StringJoiner;
 
 import static org.junit.Assert.assertTrue;
@@ -94,16 +95,20 @@ public class TestAll {
         WorkflowSchedulingAlgorithm[] wfs_algorithms = getAlgorithms();
         StringBuffer sb = new StringBuffer();
         double makespan, makespan_blind, cost, cost_blind;
-        boolean blind_mk_winner, blind_cost_winner;
+        boolean blind_mk_winner, blind_cost_winner, blind_absolute_mk_winner, blind_absolute_cost_winner;
 
-        sb.append("wf_num, mk_blind, cost_blind, mk_maxmin, cost_maxmin, mk_minmin, cost_minmin, mk_myopic, cost_myopic, wk_connex, blind_mk_winner, blind_cost_winner\n");
+        sb.append("wf_num, num_nodes, num_edges, mk_blind, cost_blind, mk_maxmin, cost_maxmin, mk_minmin, cost_minmin, mk_myopic, cost_myopic, wk_connex, blind_mk_winner, blind_cost_winner, blind_absolute_mk_winner, blind_absolute_cost_winner\n");
+
+        long global_seed = System.currentTimeMillis();
+        Random global_rnd = new Random(global_seed);
+
 
         for(int i=0; i<n; i++) {
             System.out.println("Testing workflow " + i);
             //Configuracion que funciona
             //Workflow w = Generator.randomWorkflow(System.currentTimeMillis(), 10, 18, 50., 100.0);
             long millis = System.currentTimeMillis();
-            Workflow w = Generator.connectedRandomWorkflow(millis, 10, 10., 1000.);
+            Workflow w = Generator.connectedRandomWorkflow(millis, 1 + global_rnd.nextInt(50), 50., 100.);
             System.out.printf("Semilla: %d\n", millis);
             //Utils.writeObject("workflow" +i +".obj", w);
             Utils.writeJson(String.format("workflow%d.obj", i), w);
@@ -111,7 +116,7 @@ public class TestAll {
             Utils.writeFile(String.format("workflow%d.seed", i), Long.toString(millis));
             GEXFConverter.export(GEXFConverter.toGEXF(w), "workflow" + i + ".gexf");
 
-            List<Schedule> blindSchedule = Blind.schedule(w, resourceConfigs);
+            List<Schedule> blindSchedule = Blind.schedule(w, resourceConfigs, ExecutionCost.create());
             makespan_blind = Utils.computeMakespan(blindSchedule);
             cost_blind = Utils.computeCostGlobal(blindSchedule);
 
@@ -120,12 +125,21 @@ public class TestAll {
             assertTrue(Utils.checkValidSchedule(blindSchedule));
 
             List<Resource> resourceList = Utils.getResourcesFromSchedule(blindSchedule);
+            Utils.writeResourceList("resources" + i + ".csv", resourceList);
 
-            sb.append(String.format("%d,%.6f,%.6f", i, makespan_blind, cost_blind));
+            sb.append(String.format("%d", i));
+            sb.append(',').append(String.format("%d", w.getTasks().size()));
+            sb.append(',').append(String.format("%d", w.getDependencies().size()));
+            sb.append(',').append(String.format("%.6f", makespan_blind));
+            sb.append(',').append(String.format("%.6f", cost_blind));
+
             System.out.printf("Blind makespan: %.6f, cost: %.6f\n", makespan_blind, cost_blind);
 
             blind_mk_winner = false;
             blind_cost_winner = false;
+            blind_absolute_mk_winner = true;
+            blind_absolute_cost_winner = true;
+
             for(WorkflowSchedulingAlgorithm algo: wfs_algorithms) {
                 Utils.initResources(resourceList);
 
@@ -135,6 +149,8 @@ public class TestAll {
 
                 blind_mk_winner = blind_mk_winner | makespan_blind <= makespan;
                 blind_cost_winner = blind_cost_winner | cost_blind <= cost;
+                blind_absolute_mk_winner = blind_absolute_mk_winner &  makespan_blind < makespan;
+                blind_absolute_cost_winner = blind_absolute_cost_winner & cost_blind < cost;
 
                 Utils.writeFile("schedule" + algo.getName() + i + ".R", Utils.createRGanttScript(scheduleSimple, algo.getName() + i));
                 Utils.writeFile("schedule" + algo.getName() + i + ".csv", Utils.echoSchedule(scheduleSimple));
@@ -145,6 +161,8 @@ public class TestAll {
             sb.append(",").append(w.isFullyConnected());
             sb.append(",").append(blind_mk_winner);
             sb.append(",").append(blind_cost_winner);
+            sb.append(",").append(blind_absolute_mk_winner);
+            sb.append(",").append(blind_absolute_cost_winner);
             sb.append("\n");
         }
         Utils.writeFile("results.csv", sb.toString());

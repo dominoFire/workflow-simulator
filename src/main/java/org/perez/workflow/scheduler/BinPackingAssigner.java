@@ -15,8 +15,9 @@ class BinPackingAssigner {
     int[][] visited;
     int[] used;
     Collection<BinPackingEntry> resourceMappings;
+    CostFunction f;
 
-    public BinPackingAssigner(Collection<Task> tasks, Collection<ResourceConfig> resourceConfigs) {
+    public BinPackingAssigner(Collection<Task> tasks, Collection<ResourceConfig> resourceConfigs, CostFunction cf) {
         if (tasks == null || tasks.isEmpty())
             throw new IllegalArgumentException("tasks cannot be empty or null");
         if (resourceConfigs == null || resourceConfigs.isEmpty())
@@ -40,17 +41,21 @@ class BinPackingAssigner {
             this.resourceConfigs[i] = rc;
         }
 
+        if(cf==null)
+            throw new IllegalArgumentException("CostFunction cannot be null");
+        this.f = cf;
+
         this.memCosts = new double[tasks.size()][resourceConfigs.size()];
         this.visited = new int[tasks.size()][resourceConfigs.size()];
         this.used = new int[resourceConfigs.size()];
         this.resourceMappings = new ArrayList<>();
-    }
 
-    public Collection<BinPackingEntry> getMappings() {
         //hint: sort tasks by complexity
         Arrays.sort(this.tasks, (o1, o2) -> -1 * Double.compare(o1.getComplexityFactor(), o2.getComplexityFactor()));
         Arrays.sort(this.resourceConfigs, (o1, o2) -> -1 * Double.compare(o1.getSpeedFactor(), o2.getSpeedFactor()));
+    }
 
+    public Collection<BinPackingEntry> getMappings() {
         this.take(0, 0);
         this.checkTake(0, 0);
         return this.resourceMappings;
@@ -77,17 +82,11 @@ class BinPackingAssigner {
             double taked_cost = 0.;
             for (int tt_i = t_i; tt_i < t_lim; tt_i++) {
                 Task tt = this.tasks[tt_i];
-                // TODO: change this line to minimize either cost or time
-
-                // For minimizing cost
-                //taked_cost = Math.max(
-                //        taked_cost,
-                //        tt.getComplexityFactor() / rc.getSpeedFactor() * rc.getCost() * 1000);
-
-                // For minimizing time
+                // Worst case scenario cost
                 taked_cost = Math.max(
                         taked_cost,
-                        tt.getComplexityFactor() / rc.getSpeedFactor());
+                        this.f.apply(tt, rc.toResource()));
+
             }
             this.used[y] += 1;
             double taken = take(t_lim, 0) + taked_cost;

@@ -51,3 +51,9 @@ algo_summ = algo_shape %>%
     cost_mean = mean(cost),
     cost_sd = sd(cost)
   )
+
+algo_data_absolute = algo_data %>%
+   dplyr::filter(mk_blind < mk_myopic & mk_blind < mk_minmin & mk_blind < mk_maxmin)
+  
+algo_data_some = algo_data %>%
+  dplyr::filter(mk_blind <= mk_myopic & mk_blind <= mk_minmin & mk_blind <= mk_maxmin)

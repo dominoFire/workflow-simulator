@@ -323,6 +323,11 @@ public class Utils {
         return String.format("sweeper%di%s", id_num, uuid.toString().substring(0, 8));
     }
 
+    public static String generateResourceName(String prefix) {
+        UUID uuid = UUID.randomUUID();
+        return String.format("vm_%s-%s", prefix, uuid.toString().substring(0,4));
+    }
+
     public static List<Resource> getResourcesFromSchedule(List<Schedule> schedules) {
         Set<Resource> res = new HashSet<>();
         schedules.forEach((s) -> res.add(s.getResource()));

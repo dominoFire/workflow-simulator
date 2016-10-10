@@ -51,7 +51,9 @@ schedule*.R
 *.pdf
 *.ps
 *.dot
+*.png
 
 # data
 *.seed
 .Rproj.user
+.RData

@@ -13,8 +13,6 @@ import java.util.*;
 public class CompleteBinPackingAssigner
     extends BinPackingAssigner
 {
-    /** Cost function */
-    CostFunction f;
     /** Matrix of all possible costs (t, r) */
     double[][] C;
     /** Times a resource r is used */
@@ -28,8 +26,7 @@ public class CompleteBinPackingAssigner
             Collection<ResourceConfig> resourceConfigs,
             CostFunction f)
     {
-        super(tasks, resourceConfigs);
-        this.f = f;
+        super(tasks, resourceConfigs, f);
         this.C = new double[this.tasks.length][this.resourceConfigs.length];
         this.computeMatrix();
         this.resourcesUsed = new int[this.resourceConfigs.length];
@@ -72,10 +69,15 @@ public class CompleteBinPackingAssigner
         this.resourcesUsed[rc_i] -= 1;
         this.used[rc_i] -= 1;
 
-        double taken_not = take(t_i, rc_i+1);
+        double taken_not = take(t_i, rc_i + 1);
 
-        this.memCosts[t_i][rc_i] = Math.min(taken, taken_not);
-        this.visited[t_i][rc_i] = taken < taken_not ? 1 : -1; //1 => Taken
+        if(taken < taken_not) {
+            this.memCosts[t_i][rc_i] = taken;
+            this.visited[t_i][rc_i] = 1; //1 => Taken
+        } else {
+            this.memCosts[t_i][rc_i] = taken_not;
+            this.visited[t_i][rc_i] = -1; //-1 => Taken NOT
+        }
 
         return this.memCosts[t_i][rc_i];
     }
@@ -115,7 +117,7 @@ public class CompleteBinPackingAssigner
             n = this.used[i];
             nn = n / rc.getCores();
             if (nn != 0) {
-                sum_cores += nn;
+                sum_cores += nn * rc.getCores();
                 sum_sfs += this.resourceConfigs[i].getSpeedFactor() * nn;
             }
         }

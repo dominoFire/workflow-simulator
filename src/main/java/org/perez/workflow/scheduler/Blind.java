@@ -14,7 +14,7 @@ public class Blind
 {
 
 
-    public static List<Schedule> schedule(Workflow w, List<ResourceConfig> resourceConfigs)
+    public static List<Schedule> schedule(Workflow w, List<ResourceConfig> resourceConfigs, CostFunction cf)
     {
         // Transform Workflow into segments
         Map<Task, Integer> segments = Blind.getSegments(w);
@@ -25,7 +25,7 @@ public class Blind
         Map<ResourceConfig, List<Integer>> allConfigs = new HashMap<>();
 
         for(Map.Entry<Integer, Set<Task>> e: segmentList.entrySet()) {
-            Collection<BinPackingEntry> mappings = Blind.binPacking(e.getValue(), resourceConfigs);
+            Collection<BinPackingEntry> mappings = Blind.binPacking(e.getValue(), resourceConfigs, cf);
             mappingsList.put(e.getKey(), mappings);
             //System.out.println(mappings);
             // Find out names
@@ -49,7 +49,7 @@ public class Blind
             // Generate the resource names
             List<String> names = new ArrayList<>();
             for(int i=0; i<res_n; i++)
-                names.add(Utils.generateResourceName(0));
+                names.add(Utils.generateResourceName(config.getName()));
             res_names.put(config, names);
         }
 
@@ -167,9 +167,9 @@ public class Blind
         return segments.get(t);
     }
 
-    protected static Collection<BinPackingEntry> binPacking(Collection<Task> tasks, Collection<ResourceConfig> resoureConfigs) {
-        //BinPackingAssigner bpa = new BinPackingAssigner(tasks, resoureConfigs);
-        CompleteBinPackingAssigner bpa = new CompleteBinPackingAssigner(tasks, resoureConfigs, MakespanCost.create());
+    protected static Collection<BinPackingEntry> binPacking(Collection<Task> tasks, Collection<ResourceConfig> resoureConfigs, CostFunction cf) {
+        //BinPackingAssigner bpa = new BinPackingAssigner(tasks, resoureConfigs, cf);
+        CompleteBinPackingAssigner bpa = new CompleteBinPackingAssigner(tasks, resoureConfigs, cf);
 
         return bpa.getMappings();
     }

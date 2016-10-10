@@ -35,7 +35,7 @@ public class TestBlind {
         Map<Integer, Collection<BinPackingEntry>> mappings = new HashMap<>();
 
         for(Map.Entry<Integer, Set<Task>> e: segmentList.entrySet()) {
-            Collection<BinPackingEntry> m = Blind.binPacking(e.getValue(), resourceConfigs);
+            Collection<BinPackingEntry> m = Blind.binPacking(e.getValue(), resourceConfigs, ExecutionCost.create());
             mappings.put(e.getKey(), m);
             System.out.println(m);
         }
@@ -55,7 +55,7 @@ public class TestBlind {
 
 
         for(Map.Entry<Integer, Set<Task>> e: segmentList.entrySet()) {
-            Collection<BinPackingEntry> mappings = Blind.binPacking(e.getValue(), resourceConfigs);
+            Collection<BinPackingEntry> mappings = Blind.binPacking(e.getValue(), resourceConfigs, ExecutionCost.create());
             mappingsList.put(e.getKey(), mappings);
             System.out.println(mappings);
             // Find out names
@@ -115,7 +115,7 @@ public class TestBlind {
     public void testBlind() {
         Workflow w = TestWorkflow.generateSimpleWorkflow();
         List<ResourceConfig> resourceConfigs = this.sampleConfigs();
-        List<Schedule> schedules = Blind.schedule(w, resourceConfigs);
+        List<Schedule> schedules = Blind.schedule(w, resourceConfigs, ExecutionCost.create());
 
         for(Schedule s: schedules)
             System.out.println(s);
@@ -128,6 +128,13 @@ public class TestBlind {
         resourceConfigs.add(new ResourceConfig("Medium", 2, 4096., "TestCloud", 200, 4.6));
         resourceConfigs.add(new ResourceConfig("Large", 4, 8192., "TestCloud", 400, 9.2));
         resourceConfigs.add(new ResourceConfig("ExtraLarge", 8, 2 * 8192., "TestCloud", 800, 18.4));
+
+        /*
+        resourceConfigs.add(new ResourceConfig("Small", 1, 768., "TestCloud", 100, 4.6));
+        resourceConfigs.add(new ResourceConfig("Medium", 1, 4096., "TestCloud", 300, 4.6));
+        resourceConfigs.add(new ResourceConfig("Large", 1, 8192., "TestCloud", 600, 9.2));
+        resourceConfigs.add(new ResourceConfig("ExtraLarge", 1, 2 * 8192., "TestCloud", 2400, 18.4));
+        */
 
         return  resourceConfigs;
     }
