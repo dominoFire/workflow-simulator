@@ -116,7 +116,7 @@ public class TestAll {
             Utils.writeFile(String.format("workflow%d.seed", i), Long.toString(millis));
             GEXFConverter.export(GEXFConverter.toGEXF(w), "workflow" + i + ".gexf");
 
-            List<Schedule> blindSchedule = Blind.schedule(w, resourceConfigs, ExecutionCost.create());
+            List<Schedule> blindSchedule = Blind.schedule(w, resourceConfigs, MakespanCost.create());
             makespan_blind = Utils.computeMakespan(blindSchedule);
             cost_blind = Utils.computeCostGlobal(blindSchedule);
 
