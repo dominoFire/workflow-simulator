@@ -57,3 +57,35 @@ algo_data_absolute = algo_data %>%
   
 algo_data_some = algo_data %>%
   dplyr::filter(mk_blind <= mk_myopic & mk_blind <= mk_minmin & mk_blind <= mk_maxmin)
+
+
+# Tabla LaTeX para tiempos totales de ejecucion
+
+cols_xtable_cost = c("wf_num", "num_nodes", "num_edges", "mk_blind", "mk_maxmin", "mk_minmin", "mk_myopic")
+xtable_cost = xtable::xtable(algo_data %>% 
+                               dplyr::select_(.dots = cols_xtable_cost) %>%
+                               dplyr::arrange(wf_num) %>%
+                               dplyr::rename(N = wf_num,
+                                             Nodos = num_nodes,
+                                             Aristas = num_edges,
+                                             Ciego = mk_blind,
+                                             Miope = mk_myopic,
+                                             MaxMin = mk_maxmin,
+                                             MinMin = mk_minmin))
+print(xtable_cost, include.rownames = F)
+
+
+# Tabla LaTeX para costos de ejecucion
+
+cols_xtable_cost = c("wf_num", "num_nodes", "num_edges", "cost_blind", "cost_maxmin", "cost_minmin", "cost_myopic")
+xtable_cost = xtable::xtable(algo_data %>% 
+                               dplyr::select_(.dots = cols_xtable_cost) %>%
+                               dplyr::arrange(wf_num) %>%
+                               dplyr::rename(N = wf_num,
+                                             Nodos = num_nodes,
+                                             Aristas = num_edges,
+                                             Ciego = cost_blind,
+                                             Miope = cost_myopic,
+                                             MaxMin = cost_maxmin,
+                                             MinMin = cost_minmin))
+print(xtable_cost, include.rownames = F)

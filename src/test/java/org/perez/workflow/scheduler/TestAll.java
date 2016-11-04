@@ -33,8 +33,8 @@ public class TestAll {
         int[] nnodes = new int[n], nedges = new int[n];
         for(int i=0; i<n; i++) {
             System.out.println("Case " +(i+1));
-            w = Generator.randomWorkflow(System.currentTimeMillis(), 10, 12, 1.0, 10.0);
-            //w = Generator.connectedRandomWorkflow(System.currentTimeMillis(), 10, 1., 10.);
+            //w = Generator.randomWorkflow(System.currentTimeMillis(), 10, 12, 1.0, 10.0);
+            w = Generator.connectedRandomWorkflow(System.currentTimeMillis(), 80, 1., 10.);
             Utils.writeObject("workflow" +i +".obj", w);
             GEXFConverter.export(GEXFConverter.toGEXF(w), "workflow" + i + ".gexf");
             nnodes[i] = w.getTasks().size();
@@ -87,7 +87,7 @@ public class TestAll {
 
     @Test
     public void testBlind() {
-        doTestBlind(50);
+        doTestBlind(100);
     }
 
     void doTestBlind(int n) {
@@ -116,7 +116,7 @@ public class TestAll {
             Utils.writeFile(String.format("workflow%d.seed", i), Long.toString(millis));
             GEXFConverter.export(GEXFConverter.toGEXF(w), "workflow" + i + ".gexf");
 
-            List<Schedule> blindSchedule = Blind.schedule(w, resourceConfigs, MakespanCost.create());
+            List<Schedule> blindSchedule = Blind.schedule(w, resourceConfigs, ExecutionCost.create());
             makespan_blind = Utils.computeMakespan(blindSchedule);
             cost_blind = Utils.computeCostGlobal(blindSchedule);
 

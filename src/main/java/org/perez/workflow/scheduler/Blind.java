@@ -70,7 +70,7 @@ public class Blind
                 res_idx.merge(rc, 1, Integer::sum); // res_idx[rc]++;
                 for(int j=0; j<bpe.task.size(); j++) {
                     Task t = bpe.task.get(j);
-                    Resource r = Blind.getOrCreate(resourceMap, res_name, j+1, rc);
+                    Resource r = Blind.getOrCreate(resourceMap, res_name, j, rc);
                     d = t.getComplexityFactor() / r.getSpeedFactor();
                     d_max = Math.max(d, d_max);
 
