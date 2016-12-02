@@ -7,14 +7,12 @@ import org.perez.workflow.elements.Resource;
 import org.perez.workflow.elements.Schedule;
 import org.perez.workflow.elements.Workflow;
 
-import java.util.List;
-import java.util.Random;
-import java.util.StringJoiner;
+import java.util.*;
 
 import static org.junit.Assert.assertTrue;
 
 /**
- * Created by perez on 25/07/14.
+ * Test para probar todos los algoritmos
  */
 public class TestAll {
     @Test
@@ -86,13 +84,18 @@ public class TestAll {
     }
 
     @Test
-    public void testBlind() {
-        doTestBlind(100);
+    public void testBlindCost() {
+        doTestBlind(1000, ExecutionCost.create());
     }
 
-    void doTestBlind(int n) {
+    @Test
+    public void testBlindMakespan() {
+        doTestBlind(1000, MakespanCost.create());
+    }
+
+    void doTestBlind(int n, CostFunction cf) {
         List<ResourceConfig> resourceConfigs = TestBlind.sampleConfigs();
-        WorkflowSchedulingAlgorithm[] wfs_algorithms = getAlgorithms();
+        WorkflowSchedulingAlgorithm[] wfs_algorithms = Algorithms.getAlgorithms();
         StringBuffer sb = new StringBuffer();
         double makespan, makespan_blind, cost, cost_blind;
         boolean blind_mk_winner, blind_cost_winner, blind_absolute_mk_winner, blind_absolute_cost_winner;
@@ -103,20 +106,35 @@ public class TestAll {
         Random global_rnd = new Random(global_seed);
 
 
+        Set<Integer> hashWorkflows = new HashSet<>();
+
         for(int i=0; i<n; i++) {
             System.out.println("Testing workflow " + i);
             //Configuracion que funciona
             //Workflow w = Generator.randomWorkflow(System.currentTimeMillis(), 10, 18, 50., 100.0);
-            long millis = System.currentTimeMillis();
-            Workflow w = Generator.connectedRandomWorkflow(millis, 1 + global_rnd.nextInt(50), 50., 100.);
-            System.out.printf("Semilla: %d\n", millis);
+            boolean continue_generating = true;
+            Workflow w;
+            long millis;
+            do {
+                millis = System.currentTimeMillis();
+                w = Generator.connectedRandomWorkflow(millis, 1 + global_rnd.nextInt(50), 50., 100.);
+                int hash = w.hashCode();
+                if(!hashWorkflows.contains(hash)) {
+                    hashWorkflows.add(hash);
+                    continue_generating = false;
+                } else {
+                    continue_generating = true;
+                }
+                System.out.printf("Semilla: %d\n", millis);
+            } while(continue_generating);
+
             //Utils.writeObject("workflow" +i +".obj", w);
             Utils.writeJson(String.format("workflow%d.obj", i), w);
             Utils.writeFile(String.format("workflow%d.dot", i), w.toGraphviz("workflow" + i));
             Utils.writeFile(String.format("workflow%d.seed", i), Long.toString(millis));
             GEXFConverter.export(GEXFConverter.toGEXF(w), "workflow" + i + ".gexf");
 
-            List<Schedule> blindSchedule = Blind.schedule(w, resourceConfigs, ExecutionCost.create());
+            List<Schedule> blindSchedule = Blind.schedule(w, resourceConfigs, cf);
             makespan_blind = Utils.computeMakespan(blindSchedule);
             cost_blind = Utils.computeCostGlobal(blindSchedule);
 
@@ -168,12 +186,5 @@ public class TestAll {
         Utils.writeFile("results.csv", sb.toString());
     }
 
-    WorkflowSchedulingAlgorithm[] getAlgorithms() {
-        WorkflowSchedulingAlgorithm[] wfs_algorithms = {
-                MaxMin.getInstance(),
-                MinMin.getInstance(),
-                Myopic.getInstance()
-        };
-        return wfs_algorithms;
-    }
+
 }

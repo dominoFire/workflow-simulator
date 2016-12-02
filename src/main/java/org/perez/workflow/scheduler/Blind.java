@@ -12,8 +12,6 @@ import java.util.Map.Entry;
  */
 public class Blind
 {
-
-
     public static List<Schedule> schedule(Workflow w, List<ResourceConfig> resourceConfigs, CostFunction cf)
     {
         // Transform Workflow into segments
@@ -92,7 +90,6 @@ public class Blind
         return scheds;
     }
 
-
     protected static Map<Integer, Set<Task>> toSegmentList(Map<Task, Integer> segments)
     {
         Map<Integer, Set<Task> > segmentList = new HashMap<>();
@@ -112,7 +109,6 @@ public class Blind
 
         return segmentList;
     }
-
 
     protected static int estimateResources(Map<Task, Integer> segments)
     {
@@ -148,7 +144,6 @@ public class Blind
         return segments;
     }
 
-
     protected static int findSegment(Task t, Map<Task, Integer> segments, Set<Task> visited)
     {
         visited.add(t);
@@ -167,14 +162,16 @@ public class Blind
         return segments.get(t);
     }
 
-    protected static Collection<BinPackingEntry> binPacking(Collection<Task> tasks, Collection<ResourceConfig> resoureConfigs, CostFunction cf) {
+    protected static Collection<BinPackingEntry> binPacking(Collection<Task> tasks, Collection<ResourceConfig> resoureConfigs, CostFunction cf)
+    {
         //BinPackingAssigner bpa = new BinPackingAssigner(tasks, resoureConfigs, cf);
         CompleteBinPackingAssigner bpa = new CompleteBinPackingAssigner(tasks, resoureConfigs, cf);
 
         return bpa.getMappings();
     }
 
-    public static Resource getOrCreate(Map<String, Resource> res_map, String res_name, int core, ResourceConfig rc) {
+    protected static Resource getOrCreate(Map<String, Resource> res_map, String res_name, int core, ResourceConfig rc)
+    {
         String full_name = String.format("%s@Core%d", res_name, core);
         Resource res = null;
         if(res_map.containsKey(full_name))

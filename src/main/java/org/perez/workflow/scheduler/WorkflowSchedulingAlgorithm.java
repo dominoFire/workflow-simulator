@@ -7,7 +7,8 @@ import org.perez.workflow.elements.Workflow;
 import java.util.List;
 
 /**
- * Created by microkid on 26/03/2016.
+ * Interfaz que deben implementar los algoritmos de planificacion
+ * Con exepcion del algoritmo ciego
  */
 public interface WorkflowSchedulingAlgorithm
 {

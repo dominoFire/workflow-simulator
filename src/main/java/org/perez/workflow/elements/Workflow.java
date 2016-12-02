@@ -242,6 +242,25 @@ public class Workflow
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Workflow workflow = (Workflow) o;
+
+        if (!tasks.equals(workflow.tasks)) return false;
+        return dependencies.equals(workflow.dependencies);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = tasks.hashCode();
+        result = 31 * result + dependencies.hashCode();
+        return result;
+    }
+
     class PathVisitor
     {
         List<List<Task>> paths;
