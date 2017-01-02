@@ -121,4 +121,11 @@ public class ResourceConfig
 		r.setCostHour(this.cost);
 		return r;
 	}
+
+	@Override
+	public String toString() {
+		return "ResourceConfig{" +
+				"name='" + name + '\'' +
+				'}';
+	}
 }

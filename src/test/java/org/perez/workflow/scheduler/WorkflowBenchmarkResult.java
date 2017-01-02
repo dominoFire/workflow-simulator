@@ -1,5 +1,8 @@
 package org.perez.workflow.scheduler;
 
+import com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor;
+import org.perez.workflow.elements.Workflow;
+
 /**
  * Tratando de refactorizar
  */
@@ -15,6 +18,16 @@ public class WorkflowBenchmarkResult
     private AlgorithmExecutionResult resultMaxmin;
 
     private AlgorithmExecutionResult resultMyopic;
+
+    private Workflow workflow;
+
+    public Workflow getWorkflow() {
+        return workflow;
+    }
+
+    public void setWorkflow(Workflow workflow) {
+        this.workflow = workflow;
+    }
 
     public String getBasename() {
         return basename;
@@ -66,6 +79,8 @@ public class WorkflowBenchmarkResult
             case "Myopic":
                 this.setResultMyopic(result);
                 break;
+            default:
+                throw new IllegalArgumentException("Algoritmo incorrecto: " + wsa.getName());
         }
     }
 
@@ -124,14 +139,16 @@ public class WorkflowBenchmarkResult
 
     public String CSVRow()
     {
-        AlgorithmExecutionResult makespanBlind = this.getResultBlind();
+        AlgorithmExecutionResult blind = this.getResultBlind();
         AlgorithmExecutionResult maxmin = this.getResultMaxmin();
         AlgorithmExecutionResult minmin = this.getResultMinmin();
         AlgorithmExecutionResult myopic = this.getResultMyopic();
+        Workflow w = this.getWorkflow();
 
         return new StringBuffer()
                 .append(getBasename())
-                .append(',').append(makespanBlind.getCost()).append(',').append(makespanBlind.getMakespan())
+                .append(',').append(w.getTasks().size()).append(',').append(w.getDependencies().size())
+                .append(',').append(blind.getCost()).append(',').append(blind.getMakespan())
                 .append(',').append(myopic.getCost()).append(',').append(myopic.getMakespan())
                 .append(',').append(minmin.getCost()).append(',').append(minmin.getMakespan())
                 .append(',').append(maxmin.getCost()).append(',').append(maxmin.getMakespan())
@@ -143,6 +160,7 @@ public class WorkflowBenchmarkResult
     public static String CSVHeader()
     {
         return  "id" +
+                ",num_nodes,num_edges" +
                 ",cost_blind,mk_blind" +
                 ",cost_myopic,mk_myopic" +
                 ",cost_minmin,mk_minmin" +

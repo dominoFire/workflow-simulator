@@ -4,9 +4,10 @@ import org.perez.workflow.elements.Resource;
 import org.perez.workflow.elements.Task;
 
 /**
- * Created by microkid on 9/17/16.
+ * Interface que define una funcion de costo parcial
  */
 public interface CostFunction
 {
+    /** Costo asociado a ejecutar una tarea t en el recurso r */
     double apply(Task t, Resource r);
 }

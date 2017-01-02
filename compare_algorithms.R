@@ -5,7 +5,14 @@ suppressPackageStartupMessages({
   library(reshape2)
 })
 
-algo_data = read.csv('./results-existing-cost/ResultsGeneral.csv') %>%
+tidy_logical = function(x) x %>% toupper() %>% as.logical()
+
+algo_data = read.csv('./results-existing-cost-4/ResultsGeneral.csv', stringsAsFactors = F) %>%
+  dplyr::mutate(
+    blind_makespan_winner = blind_makespan_winner %>% tidy_logical(),
+    blind_cost_winner = blind_cost_winner %>% tidy_logical(),
+    blind_absolute_cost_winner = blind_absolute_cost_winner %>% tidy_logical(),
+    blind_absolute_makespan_winner = blind_absolute_makespan_winner %>% tidy_logical()) %>%
   dplyr::rename(temp_id = id) %>%
   dplyr::mutate(id = stringr::str_extract(string = temp_id, pattern = "\\d+") %>% as.numeric())
 
@@ -45,15 +52,21 @@ algo_summary = algo_shape %>%
     `Varianza del costo` = cost_sd
   )
 
+algo_data %>%
+  dplyr::summarise(
+    perc_makespan = sum(blind_makespan_winner) / n(),
+    perc_cost = sum(blind_cost_winner) / n(),
+    perc_abs_makespan = sum(blind_absolute_makespan_winner) / n(),
+    perc_abs_cost = sum(blind_absolute_cost_winner) / n())
+
 xtable_summary = xtable::xtable(algo_summary, label = 'table:results_makespan', caption = 'Resultados agredado de los algoritmos')
 print(xtable_summary, include.rownames = F)
 
-ggplot2::ggplot(algo_data) +
-  ggplot2::geom_point(aes(x = mk_blind, y = cost_blind)) +
-  ggplot2::geom_point(aes(x = mk_minmin, y = cost_minmin)) +
-  ggplot2::geom_point(aes(x = mk_maxmin, y = cost_maxmin)) +
-  ggplot2::geom_point(aes(x = mk_myopic, y = cost_myopic))
+ggplot2::ggplot(algo_shape) +
+  ggplot2::geom_freqpoly(aes( x = cost, colour = algo_name), binwidth=5)
 
+ggplot2::ggplot(algo_shape) +
+  ggplot2::geom_freqpoly(aes( x = mk, colour = algo_name), binwidth=0.40)
 
 ggplot2::ggplot(algo_shape) +
   ggplot2::geom_point(aes( x = mk, y = cost, colour = algo_name))
@@ -73,7 +86,7 @@ algo_data_some = algo_data %>%
 
 # Tabla LaTeX para tiempos totales de ejecucion
 
-cols_xtable_cost = c("wf_num", "num_nodes", "num_edges", "mk_blind", "mk_maxmin", "mk_minmin", "mk_myopic")
+cols_xtable_cost = c("id", "num_nodes", "num_edges", "mk_blind", "mk_maxmin", "mk_minmin", "mk_myopic")
 xtable_cost = xtable::xtable(algo_data %>% 
                                dplyr::select_(.dots = cols_xtable_cost) %>%
                                dplyr::arrange(wf_num) %>%

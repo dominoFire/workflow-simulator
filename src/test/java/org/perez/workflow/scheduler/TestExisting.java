@@ -26,10 +26,11 @@ public class TestExisting
 {
 
     @Test
-    public void testPath()
+    public void testWithExistingWorkflows()
     {
-        testExisting("results-existing", ExecutionCost.create(), "results-existing-cost");
-        testExisting("results-existing", MakespanCost.create(), "results-existing-makespan");
+        testExisting("results-existing", MakespanCost.create(), "results-existing-makespan-4");
+        testExisting("results-existing", ExecutionCost.create(), "results-existing-cost-4");
+        testExisting("results-existing", SquaredExecutionCost.create(), "results-existing-squaredcost-4");
     }
 
     /**
@@ -41,8 +42,9 @@ public class TestExisting
     {
         WorkflowBenchmarkResult bench = new WorkflowBenchmarkResult();
         bench.setBasename(basename);
+        bench.setWorkflow(w);
 
-        String codenameBlind = basename + "BlindMakespan";
+        String codenameBlind = basename + "Blind";
         List<Schedule> scheduleBlind = Blind.schedule(w, sampleConfigs, cf);
         saveSchedule(scheduleBlind, codenameBlind, outputFolderPath);
         AlgorithmExecutionResult resultBlindMakespan = TestUtils.fill(scheduleBlind, scheduleBlind.hashCode(), codenameBlind);
@@ -52,6 +54,8 @@ public class TestExisting
         Utils.writeResourceList( outputFolderPath + "/resources" + basename + ".csv", resources);
 
         for(WorkflowSchedulingAlgorithm algo: getAlgorithms()) {
+            Utils.initResources(resources);
+
             String codename = basename + algo.getName();
             List<Schedule> scheduleAlgo = algo.generateSchedule(w, resources);
             saveSchedule(scheduleAlgo, codename, outputFolderPath);
@@ -66,7 +70,6 @@ public class TestExisting
 
     void saveSchedule(List<Schedule> sched, String basename, String outputFolderPath)
     {
-
         assertTrue(Utils.checkValidSchedule(sched));
 
         Utils.writeFile( outputFolderPath + "/schedule" + basename + ".R", Utils.createRGanttScript(sched, "schedule" + basename));
@@ -75,13 +78,12 @@ public class TestExisting
 
     void testExisting(String inputFolderPath, CostFunction cf, String outputFolderPath)
     {
-
         WorkflowJSONFileVisitor finder = new WorkflowJSONFileVisitor();
 
         try {
             Files.walkFileTree(Paths.get(inputFolderPath), finder);
         } catch (IOException ex) {
-            System.err.println("Algo salio mal: " + ex.getLocalizedMessage());
+            System.err.println("No pude recorrer el folder de entrada: " + ex.getLocalizedMessage());
             System.exit(1);
         }
 

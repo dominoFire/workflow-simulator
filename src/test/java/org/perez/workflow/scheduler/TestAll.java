@@ -100,7 +100,7 @@ public class TestAll {
         double makespan, makespan_blind, cost, cost_blind;
         boolean blind_mk_winner, blind_cost_winner, blind_absolute_mk_winner, blind_absolute_cost_winner;
 
-        sb.append("wf_num, num_nodes, num_edges, mk_blind, cost_blind, mk_maxmin, cost_maxmin, mk_minmin, cost_minmin, mk_myopic, cost_myopic, wk_connex, blind_mk_winner, blind_cost_winner, blind_absolute_mk_winner, blind_absolute_cost_winner\n");
+        sb.append("id, num_nodes, num_edges, mk_blind, cost_blind, mk_maxmin, cost_maxmin, mk_minmin, cost_minmin, mk_myopic, cost_myopic, wk_connex, blind_makespan_winner, blind_cost_winner, blind_absolute_makespan_winner, blind_absolute_cost_winner\n");
 
         long global_seed = System.currentTimeMillis();
         Random global_rnd = new Random(global_seed);

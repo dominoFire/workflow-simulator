@@ -28,8 +28,10 @@ public class Blind
             //System.out.println(mappings);
             // Find out names
             for(BinPackingEntry pe: mappings) {
-                List<Integer> segList = allConfigs.containsKey(pe.resourceConfig)? allConfigs.get(pe.resourceConfig): new ArrayList<Integer>();
-                segList.add(e.getKey());
+                List<Integer> segList = allConfigs.containsKey(pe.resourceConfig)?
+                        allConfigs.get(pe.resourceConfig):
+                        new ArrayList<Integer>();
+                segList.add(new Integer(e.getKey()));
                 allConfigs.put(pe.resourceConfig, segList);
             }
         }
@@ -79,7 +81,7 @@ public class Blind
                     Schedule sched = new Schedule(t, r, d, st);
 
                     //Opcion 2
-                    //Schedule sched = new Schedule(t, r, d, st_ant);
+                        //Schedule sched = new Schedule(t, r, d, st_ant);
 
                     scheds.add(sched);
                 }
@@ -165,7 +167,8 @@ public class Blind
     protected static Collection<BinPackingEntry> binPacking(Collection<Task> tasks, Collection<ResourceConfig> resoureConfigs, CostFunction cf)
     {
         //BinPackingAssigner bpa = new BinPackingAssigner(tasks, resoureConfigs, cf);
-        CompleteBinPackingAssigner bpa = new CompleteBinPackingAssigner(tasks, resoureConfigs, cf);
+        //CompleteBinPackingAssigner bpa = new CompleteBinPackingAssigner(tasks, resoureConfigs, cf);
+        ExhaustiveBinPackerAssigner bpa = new ExhaustiveBinPackerAssigner(tasks, resoureConfigs, cf);
 
         return bpa.getMappings();
     }

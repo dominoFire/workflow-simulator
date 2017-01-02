@@ -56,7 +56,8 @@ class BinPackingAssigner {
     }
 
     public Collection<BinPackingEntry> getMappings() {
-        this.take(0, 0);
+        double res = this.take(0, 0);
+        System.out.println("Best: " + res);
         this.checkTake(0, 0);
         return this.resourceMappings;
     }

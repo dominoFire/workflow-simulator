@@ -9,8 +9,7 @@ import org.perez.workflow.elements.Task;
 public class ExecutionCost
     implements CostFunction
 {
-    protected ExecutionCost() {
-    }
+    private ExecutionCost() {}
 
     @Override
     public double apply(Task t, Resource r) {

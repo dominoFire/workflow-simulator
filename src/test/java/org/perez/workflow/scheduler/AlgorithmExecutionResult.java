@@ -10,7 +10,6 @@ public class AlgorithmExecutionResult
     private double cost;
     private double makespan;
     private String algorithmName;
-    private String workflowName;
 
     public double getCost() {
         return cost;
