@@ -57,3 +57,13 @@ schedule*.R
 *.seed
 .Rproj.user
 .RData
+
+# Mac stuff
+.DS_Store
+
+# Results folders
+results-*/
+
+# Zip files
+*.zip
+
