@@ -56,6 +56,7 @@ public class ExhaustiveBinPackerAssigner
 
     private double checkMapping()
     {
+        //verificamos que se estén ocupando todos los cores
         int sum_cores = 0;
         for(int i=0; i<this.coresUsed.length; i++) {
             if(this.coresUsed[i] > 0) {
@@ -70,7 +71,7 @@ public class ExhaustiveBinPackerAssigner
         if(sum_cores!=this.tasks.length)
             return Double.POSITIVE_INFINITY;
 
-        // Definicion de costo
+        // Calculamos el máximo del costo parcial
         double max_v = 0.;
 
         for(Collection<BinPackingEntry> li_bpe: this.resMap.values()) {
@@ -81,6 +82,7 @@ public class ExhaustiveBinPackerAssigner
             }
         }
 
+        // Agarramos la mejor solución
         if(max_v < this.current_min) {
             //copiamos mejor solucion
             this.mappings.clear();

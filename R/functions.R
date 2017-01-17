@@ -18,3 +18,6 @@ density_compare_ggplot = function(algo_data, var_name, title, bin_width = 0.5) {
                                  colour = algo_name), binwidth = bin_width))
   eval(graph_expr)
 }
+
+
+tidy_logical = function(x) x %>% toupper() %>% as.logical()
